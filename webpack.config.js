@@ -53,7 +53,23 @@ module.exports = {
         devMiddleware: {
             publicPath: "http://localhost:3000/dist/",
         },
+        proxy: {
+            '/debugws': {
+                target: 'ws://10.0.237.108:80',
+                ws: true
+            },
+            '/rtt': {
+                target: 'ws://10.0.237.108:80',
+                ws: true
+            },
+            '/status': {
+                target: 'http://10.0.237.108:80'
+            },
+        },
         hot: "only"
+    },
+    optimization: {
+        minimize: false,
     },
     plugins: [
         new CopyPlugin({

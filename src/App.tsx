@@ -6,7 +6,9 @@ import CloseIcon from '@mui/icons-material/Close';
 import CustomTheme from './CustomTheme';
 import { SnackbarProvider } from 'notistack';
 import { Layout } from './components';
-import { XTerm } from 'xterm-for-react';
+
+import DebugTerminal from './views/DebugTerminal';
+import RttTerminal from './views/RttTerminal';
 
 import "./App.css";
 
@@ -31,7 +33,9 @@ class App extends React.Component {
                 >
                     <Layout>
                         <ReactRouterDom.Routes>
-                            <ReactRouterDom.Route path="/serial" element={<XTerm />} />
+                            {/* <ReactRouterDom.Route path="/serial" element={<SerialTerminal kind="serial" />} />*/}
+                            <ReactRouterDom.Route path="/rtt" element={<RttTerminal/>} />
+                            <ReactRouterDom.Route path="/debug" element={<DebugTerminal />} />
                             <ReactRouterDom.Route path="/ap" element={<Button variant="contained">This is an AP button</Button>} />
                             <ReactRouterDom.Route path="/*" element={<Button variant="contained">This is a MUI button</Button>} />
                         </ReactRouterDom.Routes>
