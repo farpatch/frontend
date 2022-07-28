@@ -1,9 +1,31 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Farpatch</title>
+    <style>
+        html,
+        body,
+        #root,
+        #root>div {
+            height: 100%;
+        }
+
+        body>#root>main {
+            height: 100%;
+        }
+
+        .full-screen {
+            height: 100%;
+            position: absolute;
+            left: 0;
+            width: 100%;
+            overflow: hidden;
+            padding: 0;
+        }
+    </style>
 </head>
 
 <body>

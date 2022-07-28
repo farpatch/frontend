@@ -1,5 +1,6 @@
 import * as React from 'react'
 import * as PropTypes from 'prop-types'
+import useAppBarHeight from '../utils/use-app-bar-height';
 
 import 'xterm/css/xterm.css'
 
@@ -8,6 +9,11 @@ import 'xterm/css/xterm.css'
 import { Terminal, ITerminalOptions, ITerminalAddon } from 'xterm'
 
 interface IProps {
+	/**
+	 * Style to apply to the internal div
+	 */
+	style?: React.CSSProperties | undefined;
+
 	/**
 	 * Class name to add to the terminal container.
 	 */
@@ -233,6 +239,10 @@ export default class Xterm extends React.Component<IProps> {
 	}
 
 	render() {
-		return <div className={this.props.className} ref={this.terminalRef} />
+		return <div
+			style={this.props.style}
+			className={this.props.className}
+			ref={this.terminalRef}
+		/>
 	}
 }

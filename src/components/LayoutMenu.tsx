@@ -23,19 +23,19 @@ const LayoutMenu: React.FC = () => {
 
   return (
     <>
-      {features.project && (
+      {/* {features.project && (
         <List disablePadding component="nav">
           <ProjectMenu />
           <Divider />
         </List>
-      )}
+      )} */}
       <List disablePadding component="nav">
         <LayoutMenuItem icon={CableIcon} label="Serial" to="/serial" />
         <LayoutMenuItem icon={TerminalIcon} label="RTT" to="/rtt" />
         <LayoutMenuItem icon={PestControlIcon} label="Debug" to="/debug" />
         <LayoutMenuItem icon={WifiIcon} label="WiFi Connection" to="/wifi" />
         <LayoutMenuItem icon={SettingsInputAntennaIcon} label="Access Point" to="/ap" />
-        {features.ntp && (
+        {/* {features.ntp && (
           <LayoutMenuItem icon={AccessTimeIcon} label="Network Time" to="/ntp" />
         )}
         {features.mqtt && (
@@ -43,7 +43,7 @@ const LayoutMenu: React.FC = () => {
         )}
         {features.security && (
           <LayoutMenuItem icon={LockIcon} label="Security" to="/security" disabled={!authenticatedContext.me.admin} />
-        )}
+        )} */}
         <LayoutMenuItem icon={SettingsIcon} label="System" to="/system" />
       </List>
     </>

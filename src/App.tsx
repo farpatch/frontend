@@ -9,6 +9,7 @@ import { Layout } from './components';
 
 import DebugTerminal from './views/DebugTerminal';
 import RttTerminal from './views/RttTerminal';
+import SerialTerminal from './views/SerialTerminal';
 
 import "./App.css";
 
@@ -29,11 +30,10 @@ class App extends React.Component {
                         <IconButton onClick={onClickDismiss(key)} size="small">
                             <CloseIcon />
                         </IconButton>
-                    )}
-                >
+                    )}>
                     <Layout>
                         <ReactRouterDom.Routes>
-                            {/* <ReactRouterDom.Route path="/serial" element={<SerialTerminal kind="serial" />} />*/}
+                            <ReactRouterDom.Route path="/serial" element={<SerialTerminal />} />
                             <ReactRouterDom.Route path="/rtt" element={<RttTerminal/>} />
                             <ReactRouterDom.Route path="/debug" element={<DebugTerminal />} />
                             <ReactRouterDom.Route path="/ap" element={<Button variant="contained">This is an AP button</Button>} />

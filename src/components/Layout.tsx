@@ -10,6 +10,7 @@ import { RequiredChildrenProps } from '../utils';
 import LayoutDrawer from './LayoutDrawer';
 import LayoutAppBar from './LayoutAppBar';
 import { LayoutContext } from './context';
+import useAppBarHeight from '../utils/use-app-bar-height';
 
 export const DRAWER_WIDTH = 280;
 
@@ -34,7 +35,9 @@ const Layout: React.FC<RequiredChildrenProps> = ({ children }) => {
         sx={{ marginLeft: { md: `${DRAWER_WIDTH}px` } }}
       >
         <Toolbar />
-        {children}
+        <Box height={"calc(100vh - " + useAppBarHeight() + "px)"}>
+          {children}
+        </Box>
       </Box>
     </LayoutContext.Provider >
   );

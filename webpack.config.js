@@ -62,9 +62,16 @@ module.exports = {
                 target: 'ws://10.0.237.108:80',
                 ws: true
             },
+            '/terminal': {
+                target: 'ws://10.0.237.108:80',
+                ws: true
+            },
             '/status': {
                 target: 'http://10.0.237.108:80'
             },
+            // '/rtt/status': {
+            //     target: 'http://10.0.237.108:80'
+            // },
         },
         hot: "only"
     },

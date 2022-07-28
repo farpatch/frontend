@@ -1,26 +1,38 @@
 import * as React from 'react';
+import { Box } from '@mui/material';
 import XTerm from '../components/XTerm';
 import { FitAddon } from 'xterm-addon-fit';
 import { SerializeAddon } from "xterm-addon-serialize";
 import { array } from 'prop-types';
+import { appBarHeight } from '../utils/use-app-bar-height';
 
-
-interface TerminalProps {
+interface TerminalProps extends React.PropsWithChildren {
     ws: string | URL,
-    onData: (websocket: WebSocket, data: string) => void | null,
+    onData?: (websocket: WebSocket, data: string) => void,
+    onConnected?: (websocket: WebSocket) => void,
+    onDisconnected?: (websocket: WebSocket) => void,
+    onStateChange?: (newState: string) => void,
 };
 
 interface TerminalState {
     state: string,
     wsKey: string,
     className: string,
+    componentHeight: number | null,
+}
+
+interface WebSocketTimeout extends WebSocket {
+    ontimeout?: () => void,
+    intervalId?: NodeJS.Timer,
 }
 
 class Terminal extends React.Component<TerminalProps, TerminalState> {
     xtermRef: React.RefObject<XTerm> = React.createRef();
+    body: React.RefObject<HTMLDivElement> = React.createRef();
     fitAddon = new FitAddon();
     serializeAddon = new SerializeAddon();
     wsKey: string;
+    bodyHeight = 0;
 
     static terminalMap = new Map<string, Terminal>();
     static savedSerialization = new Map<string, string>();
@@ -29,18 +41,25 @@ class Terminal extends React.Component<TerminalProps, TerminalState> {
 
     constructor(props: TerminalProps) {
         super(props);
-        window.addEventListener('resize', () => {
-            if (this.xtermRef.current !== null) {
-                this.fitAddon.fit();
-            }
-        });
         this.wsKey = JSON.stringify(props.ws);
         Terminal.terminalMap.set(this.wsKey, this);
         this.state = {
             state: this.getStateString(),
             wsKey: this.wsKey,
-            className: 'term-' + this.wsKey.replace('"', ''),
+            className: 'term-' + this.wsKey.replace('"', '').replace('"', ''),
+            componentHeight: null,
         };
+    }
+
+    resizeTerminal() {
+        if (this.xtermRef.current !== null) {
+            var elements = document.getElementsByClassName(this.state.className);
+            for (var idx = 0; idx < elements.length; idx++) {
+                var element = elements[idx];
+                (element as HTMLDivElement).style.height = "calc(100vh - " + appBarHeight + "px - " + this.bodyHeight + "px)";
+            }
+            this.fitAddon.fit();
+        }
     }
 
     getStateString() {
@@ -55,10 +74,14 @@ class Terminal extends React.Component<TerminalProps, TerminalState> {
     }
 
     componentDidMount() {
+        window.addEventListener('resize', this.resizeTerminal.bind(this));
         // Connect, but only if this is the first time we're running
         if (!Terminal.websocketMap.has(this.wsKey)) {
             this.connect();
             this.setState({ state: this.getStateString() });
+            if (this.props.onStateChange) {
+                this.props.onStateChange(this.getStateString());
+            }
         }
         var terminal = this.xtermRef.current;
         if (terminal !== null) {
@@ -74,11 +97,14 @@ class Terminal extends React.Component<TerminalProps, TerminalState> {
             if (buffered) {
                 buffered.forEach((val) => terminal?.terminal.write(val));
             }
-            this.fitAddon.fit();
+            this.bodyHeight = this.body.current?.clientHeight || 0;
+            console.log("Body height: " + this.bodyHeight);
+            this.resizeTerminal();
         }
     }
 
     componentWillUnmount() {
+        window.removeEventListener('resize', this.resizeTerminal.bind(this));
         var serialization = this.serializeAddon.serialize();
         // Sometimes we get called twice, during which time we've restored the
         // existing buffer but it hasn't yet been painted. As a result, the
@@ -95,7 +121,13 @@ class Terminal extends React.Component<TerminalProps, TerminalState> {
     timeout = 250;
 
     connect = () => {
-        var ws = new WebSocket("ws://" + window.location.host + "/" + this.props.ws);
+        // Don't double-connect. If this is already in the map, then there might already
+        // be a connection ongoing. In that case, don't create a new one and simply allow
+        // that connection to either fail (in which case it will be retried) or succeed.
+        if (Terminal.websocketMap.has(this.wsKey)) {
+            return;
+        }
+        var ws: WebSocketTimeout = new WebSocket("ws://" + window.location.host + "/" + this.props.ws);
         ws.binaryType = 'arraybuffer';
         Terminal.websocketMap.set(this.wsKey, ws);
 
@@ -106,8 +138,14 @@ class Terminal extends React.Component<TerminalProps, TerminalState> {
         // websocket onopen event listener
         ws.onopen = () => {
             var that = Terminal.terminalMap.get(thatKey);
+            if (that?.props.onConnected) {
+                that.props.onConnected(ws);
+            }
             if (that) {
                 that.setState({ state: that.getStateString() });
+                if (that.props.onStateChange) {
+                    that.props.onStateChange(that.getStateString());
+                }
                 that.timeout = 250; // reset timer to 250 on open of websocket connection
             }
             clearTimeout(connectInterval); // clear Interval on on open of websocket connection
@@ -115,6 +153,8 @@ class Terminal extends React.Component<TerminalProps, TerminalState> {
 
         // websocket onclose event listener
         ws.onclose = e => {
+            clearInterval(ws.intervalId);
+
             // Retry interval is double the last one, ceiling of 10 sec.
             var that = Terminal.terminalMap.get(thatKey);
             if (that) {
@@ -124,9 +164,20 @@ class Terminal extends React.Component<TerminalProps, TerminalState> {
                     e.reason
                 );
 
+                // Delete the websocket map entry. It will get recreated
+                // by the `check()` function.
+                Terminal.websocketMap.delete(thatKey);
+
+                if (that?.props.onDisconnected) {
+                    that.props.onDisconnected(ws);
+                }
+
                 that.timeout = retryInterval; //increment retry interval
                 connectInterval = setTimeout(this.check, retryInterval); //call check function after timeout
                 that.setState({ state: that.getStateString() });
+                if (that.props.onStateChange) {
+                    that.props.onStateChange(that.getStateString());
+                }
             }
         };
 
@@ -139,7 +190,12 @@ class Terminal extends React.Component<TerminalProps, TerminalState> {
             );
 
             Terminal.websocketMap.get(thatKey)?.close();
-            Terminal.websocketMap.delete(thatKey);
+        };
+
+        ws.ontimeout = function () {
+            if (ws.readyState == WebSocket.OPEN) {
+                ws.send('');
+            }
         };
 
         ws.onmessage = e => {
@@ -159,6 +215,10 @@ class Terminal extends React.Component<TerminalProps, TerminalState> {
                 buffered.push(writtenData);
             }
         };
+
+        // Send a null packet every 2000 ms, in order to ensure the wifi connection
+        // is still up.
+        ws.intervalId = setInterval(ws.ontimeout.bind(ws), 2000);
     }
 
     /**
@@ -170,18 +230,21 @@ class Terminal extends React.Component<TerminalProps, TerminalState> {
     };
 
     render() {
-        return <><XTerm
-            ref={this.xtermRef}
-            className={this.state.className}
-            addons={[this.fitAddon, this.serializeAddon]}
-            options={{ cursorBlink: true, convertEol: true }}
-            onData={(data) => {
-                var ws = Terminal.websocketMap.get(this.wsKey);
-                if (ws && this.props.onData) {
-                    this.props.onData(ws, data);
-                }
-            }}
-        /><div>{this.getStateString()}</div></>;
+        return <Box height={"calc(100vh - " + appBarHeight + "px)"}>
+            <XTerm
+                ref={this.xtermRef}
+                className={this.state.className}
+                addons={[this.fitAddon, this.serializeAddon]}
+                options={{ cursorBlink: true, convertEol: true }}
+                onData={(data) => {
+                    var ws = Terminal.websocketMap.get(this.wsKey);
+                    if (ws && this.props.onData) {
+                        this.props.onData(ws, data);
+                    }
+                }}
+            />
+            <div ref={this.body}>{this.props.children}</div>
+        </Box>;
     }
 }
 
