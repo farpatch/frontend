@@ -8,6 +8,7 @@ import { appBarHeight } from '../utils/use-app-bar-height';
 
 interface TerminalProps extends React.PropsWithChildren {
     ws: string | URL,
+    stateId?: string,
     onData?: (websocket: WebSocket, data: string) => void,
     onConnected?: (websocket: WebSocket) => void,
     onDisconnected?: (websocket: WebSocket) => void,
@@ -43,8 +44,9 @@ class Terminal extends React.Component<TerminalProps, TerminalState> {
         super(props);
         this.wsKey = JSON.stringify(props.ws);
         Terminal.terminalMap.set(this.wsKey, this);
+        var [stateString, stateColor] = this.getStateValues();
         this.state = {
-            state: this.getStateString(),
+            state: stateString,
             wsKey: this.wsKey,
             className: 'term-' + this.wsKey.replace('"', '').replace('"', ''),
             componentHeight: null,
@@ -57,19 +59,35 @@ class Terminal extends React.Component<TerminalProps, TerminalState> {
             for (var idx = 0; idx < elements.length; idx++) {
                 var element = elements[idx];
                 (element as HTMLDivElement).style.height = "calc(100vh - " + appBarHeight + "px - " + this.bodyHeight + "px)";
+                (element as HTMLDivElement).style.backgroundColor = "black";
             }
             this.fitAddon.fit();
         }
     }
 
-    getStateString() {
+    getStateValues() {
         var ws = Terminal.websocketMap.get(this.wsKey);
         if (!ws) {
-            return "Initializing...";
+            return ["Initializing...", 'rgb(0, 149, 255)'];
         } else if (ws.readyState == WebSocket.OPEN) {
-            return "Connected";
+            return ["Connected", 'rgb(75, 210, 143)'];
         } else {
-            return "Reconnecting...";
+            return ["Reconnecting...", 'rgb(255, 170, 0)'];
+        }
+    }
+
+    updateState() {
+        var [stateString, stateColor] = this.getStateValues();
+        if (this.props.stateId) {
+            var stateId = this.props.stateId;
+            var element = document.getElementById(stateId);
+            if (element) {
+                element.style.backgroundColor = stateColor;
+            }
+        }
+        this.setState({ state: stateString });
+        if (this.props.onStateChange) {
+            this.props.onStateChange(stateString);
         }
     }
 
@@ -78,10 +96,7 @@ class Terminal extends React.Component<TerminalProps, TerminalState> {
         // Connect, but only if this is the first time we're running
         if (!Terminal.websocketMap.has(this.wsKey)) {
             this.connect();
-            this.setState({ state: this.getStateString() });
-            if (this.props.onStateChange) {
-                this.props.onStateChange(this.getStateString());
-            }
+            this.updateState();
         }
         var terminal = this.xtermRef.current;
         if (terminal !== null) {
@@ -98,9 +113,9 @@ class Terminal extends React.Component<TerminalProps, TerminalState> {
                 buffered.forEach((val) => terminal?.terminal.write(val));
             }
             this.bodyHeight = this.body.current?.clientHeight || 0;
-            console.log("Body height: " + this.bodyHeight);
             this.resizeTerminal();
         }
+        this.updateState();
     }
 
     componentWillUnmount() {
@@ -142,10 +157,7 @@ class Terminal extends React.Component<TerminalProps, TerminalState> {
                 that.props.onConnected(ws);
             }
             if (that) {
-                that.setState({ state: that.getStateString() });
-                if (that.props.onStateChange) {
-                    that.props.onStateChange(that.getStateString());
-                }
+                this.updateState();
                 that.timeout = 250; // reset timer to 250 on open of websocket connection
             }
             clearTimeout(connectInterval); // clear Interval on on open of websocket connection
@@ -173,11 +185,11 @@ class Terminal extends React.Component<TerminalProps, TerminalState> {
                 }
 
                 that.timeout = retryInterval; //increment retry interval
-                connectInterval = setTimeout(this.check, retryInterval); //call check function after timeout
-                that.setState({ state: that.getStateString() });
-                if (that.props.onStateChange) {
-                    that.props.onStateChange(that.getStateString());
-                }
+                connectInterval = setTimeout(this.check.bind(that), retryInterval); //call check function after timeout
+                this.updateState();
+            } else {
+                console.log(`No 'that' object exists!`);
+                debugger;
             }
         };
 

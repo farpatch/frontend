@@ -30,9 +30,9 @@ const LayoutMenu: React.FC = () => {
         </List>
       )} */}
       <List disablePadding component="nav">
-        <LayoutMenuItem icon={CableIcon} label="Serial" to="/serial" />
-        <LayoutMenuItem icon={TerminalIcon} label="RTT" to="/rtt" />
-        <LayoutMenuItem icon={PestControlIcon} label="Debug" to="/debug" />
+        <LayoutMenuItem icon={CableIcon} label="Serial" to="/serial" statusIdBase='connection-status' statusClassName='connection-status' />
+        <LayoutMenuItem icon={TerminalIcon} label="RTT" to="/rtt" statusIdBase='connection-status' statusClassName='connection-status' />
+        <LayoutMenuItem icon={PestControlIcon} label="Debug" to="/debug" statusIdBase='connection-status' statusClassName='connection-status' />
         <LayoutMenuItem icon={WifiIcon} label="WiFi Connection" to="/wifi" />
         <LayoutMenuItem icon={SettingsInputAntennaIcon} label="Access Point" to="/ap" />
         {/* {features.ntp && (

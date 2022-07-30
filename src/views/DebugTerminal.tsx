@@ -1,6 +1,13 @@
 import * as React from 'react';
 import Terminal from './Terminal';
 
+import Chip from '@mui/material/Chip';
+// import List from '@mui/material/List';
+// import ListItem from '@mui/material/ListItem';
+// import ListItemButton from '@mui/material/ListItemButton';
+// import ListItemIcon from '@mui/material/ListItemIcon';
+// import ListItemText from '@mui/material/ListItemText';
+
 class DebugTerminal extends React.Component<{}, { currentState: string }> {
 
     constructor(props: React.PropsWithChildren) {
@@ -16,8 +23,8 @@ class DebugTerminal extends React.Component<{}, { currentState: string }> {
     }
 
     render() {
-        return <Terminal ws="debugws" onStateChange={this.handleChange}>
-            <div>{this.state.currentState}</div>
+        return <Terminal ws="ws/debug" onStateChange={this.handleChange}  stateId='connection-status-Debug'>
+            <Chip label={this.state.currentState} />
         </Terminal>;
     }
 }

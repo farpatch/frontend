@@ -4,8 +4,7 @@ import Terminal from './Terminal';
 class SerialTerminal extends React.Component {
     render() {
         return <>
-        <Terminal ws="terminal" onData={(ws, data) => ws.send(data)} />
-        {/* <div>{this.getStateString()}</div> */}
+            <Terminal ws="ws/uart" onData={(ws, data) => ws.send(data)} stateId='connection-status-Serial' />
         </>;
     }
 }

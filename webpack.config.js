@@ -54,24 +54,24 @@ module.exports = {
             publicPath: "http://localhost:3000/dist/",
         },
         proxy: {
-            '/debugws': {
+            '/ws/debug': {
                 target: 'ws://10.0.237.108:80',
                 ws: true
             },
-            '/rtt': {
+            '/ws/rtt': {
                 target: 'ws://10.0.237.108:80',
                 ws: true
             },
-            '/terminal': {
+            '/ws/uart': {
                 target: 'ws://10.0.237.108:80',
                 ws: true
             },
             '/status': {
                 target: 'http://10.0.237.108:80'
             },
-            // '/rtt/status': {
-            //     target: 'http://10.0.237.108:80'
-            // },
+            '/rtt/status': {
+                target: 'http://10.0.237.108:80'
+            },
         },
         hot: "only"
     },

@@ -2,3 +2,11 @@
     margin: 1rem;
     font-family: Arial, Helvetica, sans-serif;
 }
+
+.connection-status {
+    height: 10px;
+    width: 10px;
+    background-color: rgb(75, 210, 143, 0);
+    border-radius: 50%;
+    display: inline-block;
+  }
