@@ -1,9 +1,13 @@
 <!DOCTYPE html>
+<html lang="en">
 
 <head>
+    <meta charset="utf-8">
     <link rel="stylesheet" href="css/line-awesome.min.css">
     <link rel="stylesheet" href="css/desktop.css">
     <link rel="stylesheet" href="css/mobile.css">
+    <link rel="stylesheet" href="css/xterm.css" />
+    <meta name="viewport" content="width=device-width">
 
     <script src="main.js"></script>
 </head>
@@ -11,7 +15,7 @@
 <body>
     <nav class="sidenav">
         <ul class="sidenav-nav">
-            <li class="sidenav-item sidenav-item-active" id="dashboard-button">
+            <li class="sidenav-item" id="dashboard-button">
                 <a class="sidenav-link">
                     <span class="las la-3x la-home icon"></span>
                     <span class="link-text">Dashboard</span>
@@ -58,13 +62,10 @@
     </nav>
 
     <main>
-        <div class="main-content main-content-active" id="dashboard-view">
+        <div class="main-content" id="dashboard-view">
             <div>Version: 1.0</div>
         </div>
-        <div class="main-content" id="uart-view">
-            <div>[Terminal goes here]</div>
-            <img src="robot-background.png" width="100%" height="100%" />
-        </div>
+        <div class="main-content" id="uart-view"></div>
         <div class="main-content" id="rtt-view">
             <div>[RTT goes here]</div>
         </div>
@@ -76,3 +77,5 @@
         </div>
     </main>
 </body>
+
+</html>

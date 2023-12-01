@@ -1,0 +1,22 @@
+# Text for humans
+LICENSE text eol=lf
+HACKING text eol=lf
+COPYING text eol=lf
+README.* text eol=lf
+
+# Source code
+*.json text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+
+# Git control files
+.gitattributes eol=lf
+.gitignore eol=lf
+.gitmodules eol=lf
+
+# Other binary files
+*.png binary
+*.jpg binary
+*.bin binary
