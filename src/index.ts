@@ -1,16 +1,9 @@
-import { FarpatchWidget } from './interfaces';
-import { UartWidget } from './interface/uart';
-import { DashboardWidget } from './interface/dashboard';
-
-var FarpatchWidgets: { [key: string]: FarpatchWidget } = {
-    "dashboard": new DashboardWidget(),
-    "uart": new UartWidget(),
-};
+import { FarpatchWidget, farpatchWidgets } from './interfaces';
 
 // TODO: Get the current widget from the address bar, if one exists
-var currentWidgetName: string = "dashboard";
-var currentWidget: FarpatchWidget = FarpatchWidgets[currentWidgetName];
-var currentWidgetView: HTMLElement = document.getElementById(currentWidgetName + "-view") as HTMLElement;
+var currentWidget: FarpatchWidget = farpatchWidgets[0];
+var widgetViews: HTMLElement[] = [];
+// var currentWidgetView: HTMLElement = document.getElementById(currentWidgetName + "-view") as HTMLElement;
 
 function addToggleSidebarListener(element: HTMLElement) {
     // Hide or show the sidebar. MaterialUI calls this toggling between
@@ -31,97 +24,88 @@ function addToggleSidebarListener(element: HTMLElement) {
     }, false);
 }
 
-// On load, add a listener for mouse clicks on the navigation bar.
-function setupNavItem(element: HTMLElement) {
-    // Get the base name of the element in order to set up the callback.
-    var elementBase = element.id.replace("-button", "");
-    if (typeof (FarpatchWidgets[elementBase]) === 'undefined') {
-        console.log("No widget found for " + elementBase);
-        // return;
-    } else {
-        console.log("Setting up widget for " + elementBase);
-        var elementContent = document.getElementById(elementBase + "-view");
-        if (typeof (elementContent) === 'undefined' || elementContent === null) {
-            console.log("No element found for " + elementBase + "-view");
-            return;
-        }
-        FarpatchWidgets[elementBase].onInit();
+function deactivateWidget(widget: FarpatchWidget) {
+    widget.navItem.classList.remove("sidenav-item-active");
+    widgetViews[widget.index].classList.remove("main-content-active");
+    widget.onBlur(widgetViews[widget.index]);
+}
 
-        if (FarpatchWidgets[elementBase] === currentWidget) {
-            element.classList.add("sidenav-item-active");
-            FarpatchWidgets[elementBase].onFocus(elementContent);
-            currentWidgetView = elementContent;
-            elementContent.classList.add("main-content-active");
-        } else {
-            console.log("Not initializing widget " + elementBase);
-        }
+function activateWidget(widget: FarpatchWidget) {
+    widget.navItem.classList.add("sidenav-item-active");
+    widgetViews[widget.index].classList.add("main-content-active");
+    widget.onFocus(widgetViews[widget.index]);
+}
+
+function switchToWidget(widget: FarpatchWidget) {
+    if (widget === currentWidget) {
+        return;
     }
+    deactivateWidget(currentWidget);
+    currentWidget = widget;
+    activateWidget(widget);
+}
 
-    // Hook "click" for each navigation item. The listener will:
-    //      1. Loop through each nav item and remove the "active" class for
-    //         each inactive item and add it to the newly-clicked item.
-    //      2. Unhide the correct view to activate it
-    element.addEventListener('click', function () {
-        var main = document.getElementsByTagName("main")[0];
-        var navItems = document.querySelectorAll(".sidenav-item");
-        var elementBase = element.id.replace("-button", "");
-        if (typeof (FarpatchWidgets[elementBase]) !== 'undefined') {
-            if (FarpatchWidgets[elementBase] !== currentWidget) {
-                var newElementContent = document.getElementById(elementBase + "-view");
-                if (typeof (newElementContent) === 'undefined' || newElementContent === null) {
-                    console.log("No element found for " + elementBase + "-view");
-                    return;
-                }
-
-                currentWidget.onBlur(currentWidgetView);
-                FarpatchWidgets[elementBase].onFocus(newElementContent);
-                currentWidget = FarpatchWidgets[elementBase];
-                currentWidgetName = elementBase;
-                currentWidgetView = newElementContent;
-            }
-        }
-
-        for (var i = 0; i < navItems.length; i++) {
-            var navItem = navItems[i];
-            if (navItem === element) {
-                if (!navItem.classList.contains("sidenav-item-active")) {
-                    navItem.classList.add("sidenav-item-active");
-                }
-            } else {
-                navItem.classList.remove("sidenav-item-active");
-            }
-        }
-
-        var mainViews = document.querySelectorAll(".main-content-active");
-        for (var i = 0; i < mainViews.length; i++) {
-            var mainView = mainViews[i];
-            mainView.classList.remove("main-content-active");
-        }
-
-        var elementBase = element.id.replace("-button", "");
-        var elementContent = document.getElementById(elementBase + "-view");
-        if (typeof (elementContent) === 'undefined' || elementContent === null) {
-            console.log("No element found for " + elementBase + "-view");
-            return;
-        }
-        elementContent.classList.add("main-content-active");
+// On load, add a listener for mouse clicks on the navigation bar.
+function setupNavItem(widget: FarpatchWidget) {
+    var w = widget;
+    widget.navItem.addEventListener('click', function () {
+        switchToWidget(w);
     }, false);
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    var navItems = document.querySelectorAll(".sidenav-item");
-    for (var i = 0; i < navItems.length; i++) {
-        // For the "toggle" button, don't add a listener. Instead, have it
-        // toggle the visibility of the sidebar.
-        if (navItems[i].classList.contains("sidenav-item-toggle")) {
-            addToggleSidebarListener(navItems[i] as HTMLElement);
-        } else {
-            setupNavItem(navItems[i] as HTMLElement);
-        }
+    // Populate the page
+    var body = document.getElementsByTagName("body")[0];
+    var sidenav = document.createElement("nav");
+    var mainView: HTMLElement = document.createElement("main");
+
+    sidenav.classList.add("sidenav");
+    var sidenavList = document.createElement("ul");
+    sidenavList.classList.add("sidenav-nav");
+
+    for (var i = 0; i < farpatchWidgets.length; i++) {
+        var widget = farpatchWidgets[i];
+        widget.onInit();
+
+        var widgetView = document.createElement("div");
+        widgetView.classList.add("main-content");
+        widgetView.id = widget.name + "-view";
+        widgetViews.push(widgetView);
+
+        mainView.appendChild(widgetView);
+        sidenavList.appendChild(widget.navItem);
+
+        setupNavItem(widget);
     }
 
-    // var navItems = document.querySelectorAll(".main-viewport");
-    // for (var i = 0; i < navItems.length; i++) {
-    //     addNavListener(navItems[i]);
-    // }
+    // Add the button to collapse the sidebar
+    var sidebarFiller = document.createElement("li");
+    sidebarFiller.classList.add("sidenav-item-filler");
+    sidenavList.appendChild(sidebarFiller);
+    var toggleSidebar = document.createElement("li");
+    toggleSidebar.classList.add("sidenav-item");
+    toggleSidebar.classList.add("sidenav-item-toggle");
+    toggleSidebar.id = "rail-toggle-button";
+    var toggleSidebarLink = document.createElement("a");
+    toggleSidebarLink.classList.add("sidenav-link");
+    var toggleSidebarIcon = document.createElement("span");
+    toggleSidebarIcon.classList.add("las");
+    toggleSidebarIcon.classList.add("la-3x");
+    toggleSidebarIcon.classList.add("la-bars");
+    toggleSidebarIcon.classList.add("icon");
+    var toggleSidebarText = document.createElement("span");
+    toggleSidebarText.classList.add("link-text");
+    toggleSidebarText.innerText = "Hide Sidebar";
+    toggleSidebarLink.appendChild(toggleSidebarIcon);
+    toggleSidebarLink.appendChild(toggleSidebarText);
+    toggleSidebar.appendChild(toggleSidebarLink);
+    sidenavList.appendChild(toggleSidebar);
+    addToggleSidebarListener(toggleSidebar);
+
+    sidenav.appendChild(sidenavList);
+    body.appendChild(sidenav);
+    body.appendChild(mainView);
+
+    currentWidget = farpatchWidgets[0];
+    activateWidget(farpatchWidgets[0]);
 }, false);

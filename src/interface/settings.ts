@@ -1,12 +1,12 @@
 import { FarpatchWidget, makeNavView as makeNavItem } from "../interfaces";
 
-export class DashboardWidget implements FarpatchWidget {
+export class SettingsWidget implements FarpatchWidget {
   index: number = 0;
   view: HTMLElement = document.createElement("div");
   navItem: HTMLElement;
   name: string;
-  icon: string = "home";
-  title: string = "Dashboard";
+  icon: string = "sliders-h";
+  title: string = "Settings";
 
   constructor(name: string) {
     this.name = name;

@@ -3,10 +3,10 @@ import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { SerializeAddon } from '@xterm/addon-serialize';
 
-export class UartWidget implements FarpatchWidget {
+export class DebugWidget implements FarpatchWidget {
     name: string;
-    icon: string = "keyboard";
-    title: string = "UART";
+    icon: string = "scroll";
+    title: string = "Debug";
     index: number = 0;
 
     view: HTMLElement;
@@ -33,10 +33,10 @@ export class UartWidget implements FarpatchWidget {
     }
 
     onInit(): void {
-        console.log("Initialized UART Widget");
+        console.log("Initialized Debug Widget");
     }
     onFocus(element: HTMLElement): void {
-        console.log("Displaying UART Widget");
+        console.log("Displaying Debug Widget");
         if (!this.initialized) {
             // Ensure the parent frame doesn't get any scrollbars, since we're taking up the whole view
             element.style.overflow = "hidden";
