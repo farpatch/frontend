@@ -11,36 +11,39 @@ class DashboardItem {
   }
   render(): HTMLElement {
     var field: HTMLElement = document.createElement("div");
-    field.classList.add("fieldset-item");
+    field.classList.add("dashboard-item");
 
-    var navViewIcon = document.createElement("span");
-    navViewIcon.setAttribute("aria-hidden", "true");
-    navViewIcon.classList.add("las");
-    navViewIcon.classList.add("la-3x");
-    navViewIcon.classList.add("la-" + this.id);
-    navViewIcon.classList.add("icon");
+    var itemTitle = document.createElement("span");
+    itemTitle.classList.add("dashboard-item-title");
+    itemTitle.innerText = this.name;
+    // itemTitle.setAttribute("aria-hidden", "true");
+    // itemTitle.classList.add("las");
+    // itemTitle.classList.add("la-3x");
+    // itemTitle.classList.add("la-" + this.id);
+    // itemTitle.classList.add("icon");
 
-    var inputStack: HTMLElement = document.createElement("div");
-    inputStack.classList.add("input-stack");
+    var itemValue: HTMLElement = document.createElement("span");
+    itemValue.classList.add("dashboard-item-value");
+    itemValue.innerHTML = this.value;
 
-    var label: HTMLElement = document.createElement("label");
-    label.setAttribute("for", this.id);
-    label.setAttribute("id", this.id);
-    label.setAttribute("aria-hidden", "true");
-    label.innerText = this.name;
+    // // var label: HTMLElement = document.createElement("label");
+    // // label.setAttribute("for", this.id);
+    // // label.setAttribute("id", this.id);
+    // // label.setAttribute("aria-hidden", "true");
+    // // label.innerText = this.name;
 
-    var input: HTMLElement = document.createElement("input");
-    input.setAttribute("name", this.id);
-    input.setAttribute("aria-labelledby", this.id);
-    input.setAttribute("type", "range");
-    input.setAttribute("value", this.value);
-    input.setAttribute("max", "10");
-    input.setAttribute("style", "--track-fill: 30%");
+    // var input: HTMLElement = document.createElement("input");
+    // input.setAttribute("name", this.id);
+    // input.setAttribute("aria-labelledby", this.id);
+    // input.setAttribute("type", "range");
+    // input.setAttribute("value", this.value);
+    // input.setAttribute("max", "10");
+    // input.setAttribute("style", "--track-fill: 30%");
 
-    inputStack.appendChild(label);
-    inputStack.appendChild(input);
-    field.appendChild(navViewIcon);
-    field.appendChild(inputStack);
+    // inputStack.appendChild(label);
+    // inputStack.appendChild(input);
+    field.appendChild(itemTitle);
+    field.appendChild(itemValue);
 
     return field;
   }
@@ -61,10 +64,13 @@ class DashboardSection {
     var header: HTMLElement = document.createElement("header");
     var h2: HTMLElement = document.createElement("h2");
     h2.innerText = this.name;
+    header.classList.add("dashboard-section-header");
     header.appendChild(h2);
+    root.classList.add("dashboard-section");
     root.appendChild(header);
 
     var fieldset: HTMLElement = document.createElement("fieldset");
+    fieldset.classList.add("dashboard-section");
     for (var i = 0; i < this.items.length; i++) {
       fieldset.appendChild(this.items[i].render());
     }
@@ -118,6 +124,7 @@ export class DashboardWidget implements FarpatchWidget {
   }
 
   onInit(): void {
+    this.view.classList.add("dashboard-view");
     for (var i = 0; i < this.sections.length; i++) {
       this.view.appendChild(this.sections[i].render());
     }

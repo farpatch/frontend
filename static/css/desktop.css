@@ -1,3 +1,48 @@
+:root {
+	--surface1: lch(90 0 0);
+	--surface2: lch(100 0 0);
+	--surface3: lch(98 0 0);
+	--surface4: lch(85 0 0);
+
+	--text1: lch(20 0 0);
+	--text2: lch(40 0 0);
+
+	--thumb-highlight-color: lch(0 0 0 / 20%);
+
+	--space-xxs: .25rem;
+	--space-xs: .5rem;
+	--space-sm: 1rem;
+	--space-md: 0.5rem;
+	--space-lg: 8rem;
+	--space-xl: 3rem;
+	--space-xxl: 6rem;
+
+	--dashboard-section-width: 45ch;
+
+	--isLTR: 1;
+	--isRTL: -1;
+
+	&:dir(rtl) {
+		--isLTR: -1;
+		--isRTL: 1;
+	}
+
+	/* @media (prefers-color-scheme: dark) {
+		& {
+			--surface1: lch(10 0 0);
+			--surface2: lch(15 0 0);
+			--surface3: lch(20 0 0);
+			--surface4: lch(25 0 0);
+
+			--text1: lch(95 0 0);
+			--text2: lch(75 0 0);
+
+			--thumb-highlight-color: lch(100 0 0 / 20%);
+		}
+	} */
+}
+
+
 body {
 	padding: 0;
 	margin: 0;
@@ -87,12 +132,56 @@ main {
 	height: 100%;
 	width: 100%;
 }
-/* .sidenav-item-toggle {
-	position: absolute;
-	bottom: 0;
-} */
 
-/* .sidenav-item-toggle {
-	content: '';
-	flex-grow: 1;
-} */
+/* Dashboard Settings */
+.dashboard-section {
+	display: grid;
+	gap: var(--space-md);
+}
+
+.dashboard-section-header {
+	display: grid;
+	gap: var(--space-xxs);
+}
+
+.dashboard-view {
+	max-width: 89vw;
+	display: grid;
+	gap: var(--space-xl) var(--space-xxl);
+	--repeat: auto-fit;
+	grid-template-columns:
+		repeat(var(--repeat), minmax(min(10ch, 100%), var(--dashboard-section-width)));
+	align-items: flex-start;
+
+	@media (orientation: landscape) and (width >=640px) {
+		& {
+			--repeat: 2;
+		}
+	}
+}
+
+.dashboard-item {
+	background: var(--surface3);
+	transition: background .2s ease;
+
+	display: grid;
+	grid-template-columns: var(--space-lg) 1fr;
+	gap: var(--space-md);
+
+	padding-block: var(--space-sm);
+	padding-inline: var(--space-md);
+}
+
+.dashboard-section {
+	border: 1px solid var(--surface4);
+	background: var(--surface4);
+	padding: 0;
+	margin: 0;
+	display: grid;
+	gap: 1px;
+	border-radius: var(--space-sm);
+	overflow: hidden;
+	transition: box-shadow 0.3s ease;
+}
+
+.dashboard-item-title {}
