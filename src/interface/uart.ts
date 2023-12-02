@@ -12,6 +12,7 @@ export class UartWidget implements FarpatchWidget {
     initialized: boolean = false;
     constructor() {
         this.view = document.createElement("div");
+        this.view.classList.add("terminal");
         this.terminal = new Terminal({ theme: { background: "#000000" } });
         this.fitAddon = new FitAddon();
         this.serializeAddon = new SerializeAddon();
@@ -23,9 +24,11 @@ export class UartWidget implements FarpatchWidget {
     onFocus(element: HTMLElement): void {
         console.log("Displaying UART Widget");
         if (!this.initialized) {
+            // Ensure the parent frame doesn't get any scrollbars, since we're taking up the whole view
+            element.style.overflow = "hidden";
             console.log("Initializing xterm.js");
-            var terminalContainer = document.createElement("div");
-            this.view.appendChild(terminalContainer);
+            // var terminalContainer = document.createElement("div");
+            // this.view.appendChild(terminalContainer);
             this.terminal.loadAddon(this.fitAddon);
             this.terminal.loadAddon(this.serializeAddon);
             this.terminal.onKey((e) => {
@@ -35,16 +38,15 @@ export class UartWidget implements FarpatchWidget {
                     this.terminal.write('\n');
                 }
             });
-            this.terminal.open(terminalContainer);
-            this.terminal.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m $ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+            this.terminal.open(this.view);
+            this.terminal.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m $ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\r\n');
             this.initialized = true;
         }
         element.appendChild(this.view);
-        this.resizeFunction();
         window.addEventListener('resize', this.resizeFunction);
         window.setTimeout(() => {
-            
             this.terminal.focus();
+            this.resizeFunction();
         }, 10);
     }
     onBlur(element: HTMLElement): void {

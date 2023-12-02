@@ -7,6 +7,10 @@
         padding: 0;
     }
 
+    .main-content {
+        height: calc(100vh - 5rem);
+    }
+
     .main-sidebar-rail {
         margin-left: 0;
     }
@@ -18,12 +22,12 @@
         height: 5rem;
         align-items: flex-start;
         padding-top: 0.4rem;
-	    transition: none;
+        transition: none;
     }
 
     .sidenav-rail {
         width: 100vw;
-	    transition: none;
+        transition: none;
     }
 
     .sidenav-nav {

@@ -19,6 +19,7 @@ main {
 
 .main-content {
 	display: none;
+	height: 100vh;
 }
 
 .main-content-active {
