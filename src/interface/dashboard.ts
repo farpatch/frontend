@@ -16,32 +16,11 @@ class DashboardItem {
     var itemTitle = document.createElement("span");
     itemTitle.classList.add("dashboard-item-title");
     itemTitle.innerText = this.name;
-    // itemTitle.setAttribute("aria-hidden", "true");
-    // itemTitle.classList.add("las");
-    // itemTitle.classList.add("la-3x");
-    // itemTitle.classList.add("la-" + this.id);
-    // itemTitle.classList.add("icon");
 
     var itemValue: HTMLElement = document.createElement("span");
     itemValue.classList.add("dashboard-item-value");
     itemValue.innerHTML = this.value;
 
-    // // var label: HTMLElement = document.createElement("label");
-    // // label.setAttribute("for", this.id);
-    // // label.setAttribute("id", this.id);
-    // // label.setAttribute("aria-hidden", "true");
-    // // label.innerText = this.name;
-
-    // var input: HTMLElement = document.createElement("input");
-    // input.setAttribute("name", this.id);
-    // input.setAttribute("aria-labelledby", this.id);
-    // input.setAttribute("type", "range");
-    // input.setAttribute("value", this.value);
-    // input.setAttribute("max", "10");
-    // input.setAttribute("style", "--track-fill: 30%");
-
-    // inputStack.appendChild(label);
-    // inputStack.appendChild(input);
     field.appendChild(itemTitle);
     field.appendChild(itemValue);
 
@@ -132,10 +111,12 @@ export class DashboardWidget implements FarpatchWidget {
 
     console.log("Initialized Dashboard Widget");
   }
+
   onFocus(element: HTMLElement): void {
     console.log("Displaying Dashboard Widget");
     element.appendChild(this.view);
   }
+
   onBlur(element: HTMLElement): void {
     console.log("Archiving Dashboard Widget");
     element.removeChild(this.view);
