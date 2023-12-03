@@ -48,11 +48,11 @@ function getTasks(_request: Request, response: Response) {
 
 function getVoltages(_request: Request, response: Response) {
   var voltages: { [key: string]: number } = {
-    '3.3V': 3.3,
-    'Target': 1.8,
-    'USB': 5.02,
-    'Debug': 5.01,
-    'EXT': 3.7,
+    'system': 3.3 + Math.random() * 0.1 - 0.05,
+    'target': 1.8 + Math.random() * 0.1 - 0.05,
+    'usb': 5.0 + Math.random() * 0.1 - 0.05,
+    'debug': 5.0 + Math.random() * 0.1 - 0.05,
+    'ext': 3.7 + Math.random() * 0.1 - 0.05,
   };
   response.send(voltages);
 }

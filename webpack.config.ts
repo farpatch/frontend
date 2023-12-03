@@ -35,6 +35,7 @@ module.exports = {
         path: path.resolve(__dirname, OUTPUT),
     },
     devServer: {
+        allowedHosts: 'all',
         static: {
             directory: path.resolve(__dirname, OUTPUT),
         },

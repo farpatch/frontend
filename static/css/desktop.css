@@ -51,7 +51,7 @@ main {
 	padding: 0rem;
 	/* SIDEBAR WIDTH  */
 	margin-left: 10rem;
-	height: 100vh;
+	height: 100dvh;
 	transition: margin-left 500ms ease;
 
 }
@@ -63,7 +63,7 @@ main {
 
 .main-content {
 	display: none;
-	height: 100vh;
+	height: 100dvh;
 }
 
 .main-content-active {
@@ -76,7 +76,7 @@ main {
 	width: 10rem;
 	left: 0;
 	background-color: white;
-	height: 100vh;
+	height: 100dvh;
 	transition: width 500ms ease;
 	overflow: overlay;
 }
@@ -92,7 +92,7 @@ main {
 	margin: 0;
 	display: flex;
 	flex-direction: column;
-	height: 100vh;
+	height: 100dvh;
 }
 
 .sidenav-item {
@@ -144,7 +144,7 @@ main {
 }
 
 .dashboard-view {
-	max-width: 89vw;
+	max-width: 89dvw;
 	padding-left: 1rem;
 	padding-right: 1rem;
 	display: grid;

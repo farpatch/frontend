@@ -1,5 +1,7 @@
 import { FarpatchWidget, makeNavView as makeNavItem } from "../interfaces";
 
+var DASHBOARD_UPDATE_TIMER: number | null = null;
+
 class DashboardItem {
   id: string;
   name: string;
@@ -19,6 +21,7 @@ class DashboardItem {
 
     var itemValue: HTMLElement = document.createElement("span");
     itemValue.classList.add("dashboard-item-value");
+    itemValue.id = 'dashboard-item-value-' + this.id;
     itemValue.innerHTML = this.value;
 
     field.appendChild(itemTitle);
@@ -80,7 +83,7 @@ export class DashboardWidget implements FarpatchWidget {
         new DashboardItem("system-voltage", "System", "3.3V"),
         new DashboardItem("target-voltage", "Target", "1.8V"),
         new DashboardItem("usb-voltage", "USB", "5.0V"),
-        new DashboardItem("extra-voltage", "Extra", "3.8V"),
+        new DashboardItem("ext-voltage", "Extra", "3.8V"),
       ]),
       new DashboardSection("network", "Network", [
         new DashboardItem("ip-address", "IP Address", "10.0.0.5"),
@@ -115,10 +118,44 @@ export class DashboardWidget implements FarpatchWidget {
   onFocus(element: HTMLElement): void {
     console.log("Displaying Dashboard Widget");
     element.appendChild(this.view);
+
+    DASHBOARD_UPDATE_TIMER = window.setInterval(() => {
+      console.log("Updating Dashboard Widget");
+      fetch("/fp/voltages").then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        response.json().then((json) => {
+          if (!json) {
+            throw new Error("Response was not JSON");
+          }
+
+          var voltage_fields = [
+            "system",
+            "target",
+            "usb",
+            "debug",
+            "ext",
+          ];
+          for (var i = 0; i < voltage_fields.length; i++) {
+            var field = document.getElementById("dashboard-item-value-" + voltage_fields[i] + "-voltage");
+            var voltage = json[voltage_fields[i]];
+            if (field && typeof voltage === "number") {
+              field.innerText = voltage.toPrecision(3) + "V";
+            }
+          }
+        });
+      })
+    }, 1000);
   }
 
   onBlur(element: HTMLElement): void {
     console.log("Archiving Dashboard Widget");
     element.removeChild(this.view);
+
+    if (DASHBOARD_UPDATE_TIMER !== null) {
+      window.clearInterval(DASHBOARD_UPDATE_TIMER);
+      DASHBOARD_UPDATE_TIMER = null;
+    }
   }
 }
