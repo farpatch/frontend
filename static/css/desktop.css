@@ -10,12 +10,11 @@
 	--thumb-highlight-color: lch(0 0 0 / 20%);
 
 	--space-xxs: .25rem;
-	--space-xs: .5rem;
 	--space-sm: 1rem;
 	--space-md: 0.5rem;
-	--space-lg: 8rem;
+	--dashboard-value-offset: 5rem;
 	--space-xl: 3rem;
-	--space-xxl: 6rem;
+	--space-xxl: 4rem;
 
 	--dashboard-section-width: 45ch;
 
@@ -146,12 +145,15 @@ main {
 
 .dashboard-view {
 	max-width: 89vw;
+	padding-left: 1rem;
+	padding-right: 1rem;
 	display: grid;
 	gap: var(--space-xl) var(--space-xxl);
 	--repeat: auto-fit;
 	grid-template-columns:
 		repeat(var(--repeat), minmax(min(10ch, 100%), var(--dashboard-section-width)));
 	align-items: flex-start;
+	justify-content: center;
 
 	@media (orientation: landscape) and (width >=640px) {
 		& {
@@ -165,7 +167,7 @@ main {
 	transition: background .2s ease;
 
 	display: grid;
-	grid-template-columns: var(--space-lg) 1fr;
+	grid-template-columns: var(--dashboard-value-offset) 1fr;
 	gap: var(--space-md);
 
 	padding-block: var(--space-sm);
@@ -184,4 +186,8 @@ main {
 	transition: box-shadow 0.3s ease;
 }
 
-.dashboard-item-title {}
+.dashboard-section-title {
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	padding: 0.5rem;
+	margin: 0;
+}

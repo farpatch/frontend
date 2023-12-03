@@ -1,10 +1,10 @@
 {
     "compilerOptions": {
-        "esModuleInterop": true,
+      "allowSyntheticDefaultImports": true,
+      "esModuleInterop": true,
       "target": "ES5",
       "module": "CommonJS",
       "outDir": "./build",
-      "rootDir": "./src",
       "strict": true
     }
   }

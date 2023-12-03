@@ -63,6 +63,7 @@ class DashboardSection {
     var root: HTMLElement = document.createElement("section");
     var header: HTMLElement = document.createElement("header");
     var h2: HTMLElement = document.createElement("h2");
+    h2.classList.add("dashboard-section-title");
     h2.innerText = this.name;
     header.classList.add("dashboard-section-header");
     header.appendChild(h2);

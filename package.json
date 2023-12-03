@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "start": "webpack serve --config webpack.config.js --open",
-    "build": "webpack --config webpack.config.js"
+    "start": "webpack serve --config webpack.config.ts --open",
+    "build": "webpack --config webpack.config.ts"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^11.0.0",
@@ -12,8 +12,11 @@
     "webpack-dev-server": "^4.15.1"
   },
   "dependencies": {
+    "@types/node": "^20.10.2",
+    "@types/webpack": "^5.28.5",
     "@xterm/addon-fit": "^0.9.0-beta.1",
     "@xterm/addon-serialize": "^0.12.0-beta.1",
-    "@xterm/xterm": "^5.4.0-beta.1"
+    "@xterm/xterm": "^5.4.0-beta.1",
+    "ts-node": "^10.9.1"
   }
 }
