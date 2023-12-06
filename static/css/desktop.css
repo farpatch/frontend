@@ -145,8 +145,7 @@ main {
 
 .dashboard-view {
 	max-width: 89dvw;
-	padding-left: 1rem;
-	padding-right: 1rem;
+	padding: 1rem;
 	display: grid;
 	gap: var(--space-xl) var(--space-xxl);
 	--repeat: auto-fit;
