@@ -3,7 +3,8 @@ import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { SerializeAddon } from '@xterm/addon-serialize';
 import JSZM from "../../lib/zork";
-var co = require("../../lib/co/index.js");
+// var co = require("../../lib/co/index.js");
+import co from "../../lib/co";
 
 export class DebugWidget implements FarpatchWidget {
     name: string;
@@ -79,15 +80,15 @@ export class DebugWidget implements FarpatchWidget {
             var debugWidget = this;
             fetch("/zork1.z3").then((response) => {
                 response.arrayBuffer().then((buffer) => {
-                    this.zork = co.co(function* () {
+                    this.zork = co(function* () {
                         var zork = new JSZM(new Uint8Array(buffer));
                         zork.print = function* (str: string) {
                             str = str.replace("\n", "\r\n");
                             zorkTerminal.write(str);
                         };
-                        zork.read =  function* (maxlen: number): Generator  {
+                        zork.read = function* (_maxlen: number): Generator {
                             // console.log("Zork: read " + maxlen);
-                            var val = yield new Promise((resolve, reject) => {
+                            var val = yield new Promise((resolve, _reject) => {
                                 debugWidget.zorkCallback = resolve;
                             });
                             return val;
