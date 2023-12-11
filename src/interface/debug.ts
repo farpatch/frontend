@@ -2,6 +2,8 @@ import { FarpatchWidget, makeNavView } from "../interfaces";
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { SerializeAddon } from '@xterm/addon-serialize';
+import JSZM from "../../lib/zork";
+var co = require("../../lib/co/index.js");
 
 export class DebugWidget implements FarpatchWidget {
     name: string;
@@ -11,6 +13,10 @@ export class DebugWidget implements FarpatchWidget {
 
     view: HTMLElement;
     navItem: HTMLElement;
+
+    zork: Generator | undefined = undefined;
+    zorkCallback: (value: string | PromiseLike<string>) => void = () => { };
+    terminalLine: string = "";
 
     terminal: Terminal;
     fitAddon: FitAddon;
@@ -35,25 +41,61 @@ export class DebugWidget implements FarpatchWidget {
     onInit(): void {
         console.log("Initialized Debug Widget");
     }
+
+    readLine(): Promise<string> {
+        return new Promise((resolve, reject) => { });
+    }
+
     onFocus(element: HTMLElement): void {
         console.log("Displaying Debug Widget");
         if (!this.initialized) {
             // Ensure the parent frame doesn't get any scrollbars, since we're taking up the whole view
             element.style.overflow = "hidden";
             console.log("Initializing xterm.js");
-            // var terminalContainer = document.createElement("div");
-            // this.view.appendChild(terminalContainer);
             this.terminal.loadAddon(this.fitAddon);
             this.terminal.loadAddon(this.serializeAddon);
             this.terminal.onKey((e) => {
-                console.log("Key pressed: " + e.key);
                 this.terminal.write(e.key);
+                if (e.key === '\h') {
+                    if (this.terminalLine.length > 0) {
+                        this.terminalLine = this.terminalLine.substring(0, this.terminalLine.length - 1);
+                    }
+                }
                 if (e.key === '\r') {
                     this.terminal.write('\n');
+                    var zcb = this.zorkCallback;
+                    var tl = this.terminalLine;
+                    this.zorkCallback = () => { };
+                    this.terminalLine = "";
+                    zcb(tl);
+                }
+                else {
+                    this.terminalLine += e.key;
                 }
             });
             this.terminal.open(this.view);
-            this.terminal.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m $ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\r\n');
+
+            var zorkTerminal = this.terminal;
+            var debugWidget = this;
+            fetch("/zork1.z3").then((response) => {
+                response.arrayBuffer().then((buffer) => {
+                    this.zork = co.co(function* () {
+                        var zork = new JSZM(new Uint8Array(buffer));
+                        zork.print = function* (str: string) {
+                            str = str.replace("\n", "\r\n");
+                            zorkTerminal.write(str);
+                        };
+                        zork.read =  function* (maxlen: number): Generator  {
+                            // console.log("Zork: read " + maxlen);
+                            var val = yield new Promise((resolve, reject) => {
+                                debugWidget.zorkCallback = resolve;
+                            });
+                            return val;
+                        };
+                        yield* zork.run();
+                    });
+                })
+            });
             this.initialized = true;
         }
         element.appendChild(this.view);
