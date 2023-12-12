@@ -23,6 +23,7 @@ var TASKS = [
 ];
 
 const GET_ENDPOINTS: { [key: string]: (request: Request, response: Response) => any } = {
+  'status': getStatus,
   'voltages': getVoltages,
   'target': getTarget,
   'version': getVersion,
@@ -41,6 +42,83 @@ const POST_ENDPOINTS: { [key: string]: (request: Request, response: Response) =>
 const DELETE_ENDPOINTS: { [key: string]: (request: Request, response: Response) => any } = {
   'connect': deleteConnect,
 };
+
+function getStatus(_request: Request, response: Response) {
+  var voltages = {
+    'system': 3.3 + Math.random() * 0.1 - 0.05,
+    'target': 1.8 + Math.random() * 0.1 - 0.05,
+    'usb': 5.0 + Math.random() * 0.1 - 0.05,
+    'debug': 5.0 + Math.random() * 0.1 - 0.05,
+    'ext': 3.7 + Math.random() * 0.1 - 0.05,
+  };
+
+  var target = {
+    'name': 'nrf52840',
+    'ram': 256 * 1024,
+    'flash': 1024 * 1024,
+    'cpu': 'ARM Cortex-M4F',
+  }
+  var targets = [
+    'nrf52840',
+    'mdf',
+  ];
+  response.send({
+    targets: {
+      'current': target,
+      'available': targets,
+    },
+    voltages: voltages,
+    version: {
+      'farpatch': '0.1.0',
+      'bmp': '0.1.0',
+      'hardware': 'DVT5',
+    },
+    network: {
+      'ssid': 'Omicron Persei 8',
+      'ip': '1.2.3.4'
+    },
+    system: {
+      'heap': 149552,
+      'uptime': 1551000,
+    },
+    ports: {
+      'uart': {
+        'name': 'serial',
+        'baud_rate': 115200,
+        'parity': 'none',
+        'stop_bits': 1,
+        'data_bits': 8,
+        'flow_control': 'none',
+      },
+      'swo': {
+        'name': 'swo',
+        'baud_rate': 0,
+        'parity': 'none',
+        'stop_bits': 1,
+        'data_bits': 8,
+        'flow_control': 'none',
+      },
+      'uuart': {
+        'name': 'uuart',
+        'baud_rate': 0,
+        'parity': 'none',
+        'stop_bits': 1,
+        'data_bits': 8,
+        'flow_control': 'none',
+      },
+    },
+    'updates': {
+      'current_partition': {
+        'addr': 0x00010000,
+        'index': 2,
+      },
+      'next_partition': {
+        'addr': 0x00380000,
+        'index': -1,
+      }
+    }
+  });
+}
 
 function getTasks(_request: Request, response: Response) {
   response.send(TASKS);
