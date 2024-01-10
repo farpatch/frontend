@@ -83,28 +83,13 @@ function getStatus(_request: Request, response: Response) {
     },
     ports: {
       'uart': {
-        'name': 'serial',
         'baud_rate': 115200,
-        'parity': 'none',
-        'stop_bits': 1,
-        'data_bits': 8,
-        'flow_control': 'none',
       },
       'swo': {
-        'name': 'swo',
         'baud_rate': 0,
-        'parity': 'none',
-        'stop_bits': 1,
-        'data_bits': 8,
-        'flow_control': 'none',
       },
       'uuart': {
-        'name': 'uuart',
         'baud_rate': 0,
-        'parity': 'none',
-        'stop_bits': 1,
-        'data_bits': 8,
-        'flow_control': 'none',
       },
     },
     'updates': {
@@ -151,7 +136,6 @@ function getTarget(_request: Request, response: Response) {
     'available': targets,
   });
 }
-
 
 function getSerialPort(request: Request, response: Response) {
   var serialPorts = {
