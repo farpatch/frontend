@@ -1,4 +1,4 @@
-import { FarpatchWidget, makeNavView as makeNavItem } from "../interfaces";
+import { WidgetState, FarpatchWidget, makeNavView as makeNavItem } from "../interfaces";
 
 export class SettingsWidget implements FarpatchWidget {
   index: number = 0;
@@ -7,10 +7,11 @@ export class SettingsWidget implements FarpatchWidget {
   name: string;
   icon: string = "sliders-h";
   title: string = "Settings";
+  updateState: (state: WidgetState) => void = () => { };
 
   constructor(name: string) {
     this.name = name;
-    this.navItem = makeNavItem(name, this.icon, this.title);
+    this.navItem = makeNavItem(this);
   }
 
   updateIndex(index: number): void {

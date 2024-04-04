@@ -1,4 +1,4 @@
-import { FarpatchWidget, makeNavView } from "../interfaces";
+import { FarpatchWidget, WidgetState, makeNavView } from "../interfaces";
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { SerializeAddon } from '@xterm/addon-serialize';
@@ -17,9 +17,11 @@ export class UartWidget implements FarpatchWidget {
     serializeAddon: SerializeAddon;
     resizeFunction: () => void;
     initialized: boolean = false;
+    updateState: (state: WidgetState) => void = () => { };
+  
     constructor(name: string) {
         this.name = name;
-        this.navItem = makeNavView(name, this.icon, this.title);
+        this.navItem = makeNavView(this);
         this.view = document.createElement("div");
         this.view.classList.add("terminal");
         this.terminal = new Terminal({ theme: { background: "#000000" } });

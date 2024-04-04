@@ -127,6 +127,17 @@ main {
 	height: 100%;
 }
 
+.widget-state-active>.sidenav-link>.icon {
+	background-color: rgb(154, 255, 170);
+}
+
+.widget-state-paused>.sidenav-link>.icon {
+	background-color: rgb(173, 175, 192);
+}
+
+.widget-state-error>.sidenav-link>.icon {
+	background-color: rgb(255, 203, 203);
+}
 .terminal {
 	height: 100%;
 	width: 100%;

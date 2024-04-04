@@ -1,4 +1,5 @@
 import { Request, Application, Response } from 'express';
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 var CONNECTED: boolean = false;
 var SSID: string = '';

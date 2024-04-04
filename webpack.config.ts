@@ -35,19 +35,45 @@ module.exports = {
         path: path.resolve(__dirname, OUTPUT),
     },
     devServer: {
+        webSocketServer: {
+            type: 'ws',
+            options: {
+                path: '/websocket-hmr',
+            },
+        },
+        client: {
+            webSocketURL: 'auto://0.0.0.0:0/websocket-hmr',
+        },
         allowedHosts: 'all',
         static: {
             directory: path.resolve(__dirname, OUTPUT),
         },
         compress: true,
         port: 9000,
-        setupMiddlewares: (middlewares: any, devServer: any) => {
-            if (!devServer) {
-                throw new Error('webpack-dev-server is not defined');
-            }
+        proxy: [
+            {
+                context: ['/ws'],
+                target: 'ws://10.0.237.163',
+                ws: true,
+                onError(err: any, _req: any, _res: any) {
+                    console.log('Suppressing WDS proxy upgrade error:', err);
+                },
+            },
+            {
+                context: ['/fp'],
+                target: 'http://10.0.237.163',
+                ws: false,
+            },
+        ],
+        // setupMiddlewares: (middlewares: any, devServer: any) => {
+        //     if (!devServer) {
+        //         throw new Error('webpack-dev-server is not defined');
+        //     }
 
-            installMiddlewares(devServer.app);
-            return middlewares;
-        }
+        //     if (false) {
+        //         installMiddlewares(devServer.app);
+        //     }
+        //     return middlewares;
+        // }
     },
 };

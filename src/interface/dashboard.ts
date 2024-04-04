@@ -1,4 +1,4 @@
-import { FarpatchWidget, makeNavView as makeNavItem } from "../interfaces";
+import { FarpatchWidget, WidgetState, makeNavView as makeNavItem } from "../interfaces";
 
 var DASHBOARD_UPDATE_TIMER: number | null = null;
 
@@ -6,6 +6,7 @@ class DashboardItem {
   id: string;
   name: string;
   value: string;
+
   constructor(id: string, name: string, value: string) {
     this.id = id;
     this.name = name;
@@ -71,12 +72,13 @@ export class DashboardWidget implements FarpatchWidget {
   name: string;
   icon: string = "home";
   title: string = "Dashboard";
+  updateState: (state: WidgetState) => void = () => { };
 
   sections: DashboardSection[];
 
   constructor(name: string) {
     this.name = name;
-    this.navItem = makeNavItem(name, this.icon, this.title);
+    this.navItem = makeNavItem(this);
 
     this.sections = [
       new DashboardSection("voltages", "Voltages", [
