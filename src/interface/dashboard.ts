@@ -101,6 +101,11 @@ export class DashboardWidget implements FarpatchWidget {
       //   new DashboardItem("ram-size", "RAM Size", "32k"),
       // ]),
       new DashboardSection("ports", "Networking", [
+        new DashboardItem("net-hostname", "Hostname", ""),
+        new DashboardItem("net-ssid", "SSID", ""),
+        new DashboardItem("net-ip", "IP", ""),
+        new DashboardItem("net-gw", "Gateway", ""),
+        new DashboardItem("net-netmask", "Netmask", ""),
         new DashboardItem("net-gdb", "GDB", ""),
         new DashboardItem("net-rtt-tcp", "RTT (TCP)", ""),
         new DashboardItem("net-rtt-udp", "RTT (UDP)", ""),
