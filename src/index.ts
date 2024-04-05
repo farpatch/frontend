@@ -25,13 +25,13 @@ function addToggleSidebarListener(element: HTMLElement) {
 }
 
 function deactivateWidget(widget: FarpatchWidget) {
-    widget.navItem.classList.remove("sidenav-item-active");
+    widget.navItem.navView.classList.remove("sidenav-item-active");
     widgetViews[widget.index].classList.remove("main-content-active");
     widget.onBlur(widgetViews[widget.index]);
 }
 
 function activateWidget(widget: FarpatchWidget) {
-    widget.navItem.classList.add("sidenav-item-active");
+    widget.navItem.navView.classList.add("sidenav-item-active");
     widgetViews[widget.index].classList.add("main-content-active");
     widget.onFocus(widgetViews[widget.index]);
 }
@@ -48,7 +48,7 @@ function switchToWidget(widget: FarpatchWidget) {
 // On load, add a listener for mouse clicks on the navigation bar.
 function setupNavItem(widget: FarpatchWidget) {
     var w = widget;
-    widget.navItem.addEventListener('click', function () {
+    widget.navItem.navView.addEventListener('click', function () {
         switchToWidget(w);
     }, false);
 }
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function () {
         widgetViews.push(widgetView);
 
         mainView.appendChild(widgetView);
-        sidenavList.appendChild(widget.navItem);
+        sidenavList.appendChild(widget.navItem.navView);
 
         setupNavItem(widget);
     }

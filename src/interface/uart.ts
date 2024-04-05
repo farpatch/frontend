@@ -1,4 +1,4 @@
-import { FarpatchWidget, WidgetState, makeNavView } from "../interfaces";
+import { FarpatchWidget, WidgetState, NavWidget } from "../interfaces";
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { SerializeAddon } from '@xterm/addon-serialize';
@@ -10,7 +10,7 @@ export class UartWidget implements FarpatchWidget {
     index: number = 0;
 
     view: HTMLElement;
-    navItem: HTMLElement;
+    navItem: NavWidget;
 
     terminal: Terminal;
     fitAddon: FitAddon;
@@ -21,7 +21,7 @@ export class UartWidget implements FarpatchWidget {
   
     constructor(name: string) {
         this.name = name;
-        this.navItem = makeNavView(this);
+        this.navItem = new NavWidget(this);
         this.view = document.createElement("div");
         this.view.classList.add("terminal");
         this.terminal = new Terminal({ theme: { background: "#000000" } });

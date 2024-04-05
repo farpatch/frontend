@@ -1,4 +1,4 @@
-import { FarpatchWidget, makeNavView, WidgetState } from "../interfaces";
+import { FarpatchWidget, NavWidget, WidgetState } from "../interfaces";
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { SerializeAddon } from '@xterm/addon-serialize';
@@ -12,7 +12,7 @@ export class RttWidget implements FarpatchWidget {
     websocketUrl: string = "ws://" + window.location.host + "/ws/rtt";
 
     view: HTMLElement;
-    navItem: HTMLElement;
+    navItem: NavWidget;
 
     terminal: Terminal;
     fitAddon: FitAddon;
@@ -23,7 +23,7 @@ export class RttWidget implements FarpatchWidget {
 
     constructor(name: string) {
         this.name = name;
-        this.navItem = makeNavView(this);
+        this.navItem = new NavWidget(this);
         this.view = document.createElement("div");
         this.view.classList.add("terminal");
         this.terminal = new Terminal({ theme: { background: "#000000" } });

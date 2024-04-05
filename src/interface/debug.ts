@@ -1,4 +1,4 @@
-import { WidgetState, FarpatchWidget, makeNavView } from "../interfaces";
+import { WidgetState, FarpatchWidget, NavWidget } from "../interfaces";
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { SerializeAddon } from '@xterm/addon-serialize';
@@ -28,7 +28,7 @@ export class DebugWidget implements FarpatchWidget {
     websocketUrl: string = "ws://" + window.location.host + "/ws/debug";
 
     view: HTMLElement;
-    navItem: HTMLElement;
+    navItem: NavWidget;
     updateState: (state: WidgetState) => void = () => { };
 
     zork: Generator | undefined = undefined;
@@ -42,7 +42,7 @@ export class DebugWidget implements FarpatchWidget {
     initialized: boolean = false;
     constructor(name: string) {
         this.name = name;
-        this.navItem = makeNavView(this);
+        this.navItem = new NavWidget(this);
         this.view = document.createElement("div");
         this.view.classList.add("terminal");
         this.terminal = new Terminal({ theme: { background: "#000000" } });

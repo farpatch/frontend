@@ -24,7 +24,7 @@ export interface FarpatchWidget {
     index: number,
     name: string,
     view: HTMLElement,
-    navItem: HTMLElement,
+    navItem: NavWidget,
     icon: string,
     title: string,
     updateState: (state: WidgetState) => void,
@@ -34,30 +34,42 @@ export interface FarpatchWidget {
     onBlur(element: HTMLElement): void,
 }
 
-export function makeNavView(widget: FarpatchWidget): HTMLElement {
-    var navView: HTMLElement = document.createElement("li");
-    navView.classList.add("sidenav-item");
-    navView.id = widget.name + "-button";
+export class NavWidget {
+    farpatchWidget: FarpatchWidget;
+    navView: HTMLLIElement;
+    navViewLink: HTMLAnchorElement;
+    iconView: HTMLSpanElement;
+    textView: HTMLSpanElement;
 
-    var navViewLink = document.createElement("a");
-    navViewLink.classList.add("sidenav-link");
+    constructor(widget: FarpatchWidget) {
+        var navView = document.createElement("li");
+        navView.classList.add("sidenav-item");
+        navView.id = widget.name + "-button";
 
-    var navViewIcon = document.createElement("span");
-    navViewIcon.classList.add("las");
-    navViewIcon.classList.add("la-3x");
-    navViewIcon.classList.add("la-" + widget.icon);
-    navViewIcon.classList.add("icon");
+        var navViewLink = document.createElement("a");
+        navViewLink.classList.add("sidenav-link");
 
-    var navViewText = document.createElement("span");
-    navViewText.classList.add("link-text");
-    navViewText.innerText = widget.title;
+        var navViewIcon = document.createElement("span");
+        navViewIcon.classList.add("las");
+        navViewIcon.classList.add("la-3x");
+        navViewIcon.classList.add("la-" + widget.icon);
+        navViewIcon.classList.add("icon");
 
-    navViewLink.appendChild(navViewIcon);
-    navViewLink.appendChild(navViewText);
+        var navViewText = document.createElement("span");
+        navViewText.classList.add("link-text");
+        navViewText.innerText = widget.title;
 
-    navView.appendChild(navViewLink);
+        navViewLink.appendChild(navViewIcon);
+        navViewLink.appendChild(navViewText);
 
-    return navView;
+        navView.appendChild(navViewLink);
+
+        this.farpatchWidget = widget;
+        this.navView = navView as HTMLLIElement;
+        this.navViewLink = navViewLink as HTMLAnchorElement;
+        this.iconView = navViewIcon as HTMLSpanElement;
+        this.textView = navViewText as HTMLSpanElement;
+    }
 }
 
 export const farpatchWidgets: FarpatchWidget[] = [
@@ -70,9 +82,9 @@ export const farpatchWidgets: FarpatchWidget[] = [
 
 for (var i = 0; i < farpatchWidgets.length; i++) {
     farpatchWidgets[i].updateIndex(i);
-    farpatchWidgets[i].updateState = function(state: WidgetState) {
+    farpatchWidgets[i].updateState = function (state: WidgetState) {
         var states = ["Idle", "Active", "Paused", "Error"];
-        var icon = this.navItem;
+        var icon = this.navItem.navView;
         icon.classList.remove("widget-state-active");
         icon.classList.remove("widget-state-paused");
         icon.classList.remove("widget-state-error");

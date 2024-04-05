@@ -1,9 +1,9 @@
-import { WidgetState, FarpatchWidget, makeNavView as makeNavItem } from "../interfaces";
+import { WidgetState, FarpatchWidget, NavWidget } from "../interfaces";
 
 export class SettingsWidget implements FarpatchWidget {
   index: number = 0;
   view: HTMLElement = document.createElement("div");
-  navItem: HTMLElement;
+  navItem: NavWidget;
   name: string;
   icon: string = "sliders-h";
   title: string = "Settings";
@@ -11,7 +11,7 @@ export class SettingsWidget implements FarpatchWidget {
 
   constructor(name: string) {
     this.name = name;
-    this.navItem = makeNavItem(this);
+    this.navItem = new NavWidget(this);
   }
 
   updateIndex(index: number): void {
