@@ -26,7 +26,7 @@ export class RttWidget implements FarpatchWidget {
         this.navItem = new NavWidget(this);
         this.view = document.createElement("div");
         this.view.classList.add("terminal");
-        this.terminal = new Terminal({ theme: { background: "#000000" } });
+        this.terminal = new Terminal({ theme: { background: "#000000" }, convertEol: true });
         this.fitAddon = new FitAddon();
         this.serializeAddon = new SerializeAddon();
         this.resizeFunction = this.resizeTerminal.bind(this);
