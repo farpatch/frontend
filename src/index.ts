@@ -1,3 +1,4 @@
+import { get } from 'http';
 import { FarpatchWidget, farpatchWidgets } from './interfaces';
 
 // TODO: Get the current widget from the address bar, if one exists
@@ -36,6 +37,23 @@ function activateWidget(widget: FarpatchWidget) {
     widget.onFocus(widgetViews[widget.index]);
 }
 
+function getPageConfig(): { [key: string]: string } {
+    var hash = window.location.hash.substring(1);
+    if (!hash) {
+        return {};
+    }
+    return hash.split("&")
+        .map(v => v.split(`=`, 1).concat(v.split(`=`).slice(1).join(`=`)))
+        .reduce((pre, [key, value]) => ({ ...pre, [key]: value }), {});
+}
+
+function savePageConfig(config: { [key: string]: string }) {
+    var hash = Object.keys(config)
+        .map(key => `${key}=${config[key]}`)
+        .join("&");
+    window.location.hash = '#' + hash;
+}
+
 function switchToWidget(widget: FarpatchWidget) {
     if (widget === currentWidget) {
         return;
@@ -43,6 +61,9 @@ function switchToWidget(widget: FarpatchWidget) {
     deactivateWidget(currentWidget);
     currentWidget = widget;
     activateWidget(widget);
+    var config = getPageConfig();
+    config['page'] = widget.name;
+    savePageConfig(config);
 }
 
 // On load, add a listener for mouse clicks on the navigation bar.
@@ -52,15 +73,6 @@ function setupNavItem(widget: FarpatchWidget) {
         switchToWidget(w);
     }, false);
 }
-
-// export function resizeViewport() {
-//     // First we get the viewport height and we multiple it by 1% to get a value for a vh unit
-//     let vh = window.innerHeight * 0.01;
-//     // Then we set the value in the --vh custom property to the root of the document
-//     document.documentElement.style.setProperty('--vh', `${vh}px`);
-// }
-
-// document.addEventListener('resize', resizeViewport, false);
 
 document.addEventListener('DOMContentLoaded', function () {
     // Populate the page
@@ -116,7 +128,14 @@ document.addEventListener('DOMContentLoaded', function () {
     body.appendChild(mainView);
 
     currentWidget = farpatchWidgets[0];
-    activateWidget(farpatchWidgets[0]);
+    var config = getPageConfig();
+    if (config['page']) {
+        var maybeFirstWidget = farpatchWidgets.find(w => w.name === config['page']);
+        if (maybeFirstWidget) {
+            currentWidget = maybeFirstWidget;
+        }
+    }
+    activateWidget(currentWidget);
 
     // resizeViewport();
 }, false);

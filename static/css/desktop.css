@@ -13,10 +13,12 @@
 	--space-sm: 1rem;
 	--space-md: 0.5rem;
 	--dashboard-value-offset: 5rem;
+	--settings-value-offset: 5rem;
 	--space-xl: 3rem;
 	--space-xxl: 4rem;
 
 	--dashboard-section-width: 45ch;
+	--settings-section-width: 45ch;
 
 	--isLTR: 1;
 	--isRTL: -1;
@@ -199,6 +201,65 @@ main {
 }
 
 .dashboard-section-title {
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	padding: 0.5rem;
+	margin: 0;
+}
+
+/* Settings */
+.settings-section {
+	display: grid;
+	gap: var(--space-md);
+}
+
+.settings-section-header {
+	display: grid;
+	gap: var(--space-xxs);
+}
+
+.settings-view {
+	max-width: 89dvw;
+	padding: 1rem;
+	display: grid;
+	gap: var(--space-xl) var(--space-xxl);
+	--repeat: auto-fit;
+	grid-template-columns:
+		repeat(var(--repeat), minmax(min(10ch, 100%), var(--settings-section-width)));
+	align-items: flex-start;
+	justify-content: center;
+
+	@media (orientation: landscape) and (width >=640px) {
+		& {
+			--repeat: 2;
+		}
+	}
+}
+
+.settings-item {
+	background: var(--surface3);
+	transition: background .2s ease;
+
+	display: grid;
+	grid-template-columns: var(--settings-value-offset) 1fr;
+	gap: var(--space-md);
+
+	padding-block: var(--space-sm);
+	padding-inline: var(--space-md);
+}
+
+.settings-section {
+	border: 1px solid var(--surface4);
+	background: var(--surface4);
+	padding: 0;
+	margin: 0;
+	display: grid;
+	gap: 1px;
+	border-radius: var(--space-sm);
+	overflow: hidden;
+	transition: box-shadow 0.3s ease;
+}
+
+.settings-section-title {
 	font-family: Verdana, Geneva, Tahoma, sans-serif;
 	padding: 0.5rem;
 	margin: 0;

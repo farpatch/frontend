@@ -73,7 +73,6 @@ export class DashboardWidget implements FarpatchWidget {
   name: string;
   icon: string = "home";
   title: string = "Dashboard";
-  updateState: (state: WidgetState) => void = () => { };
 
   sections: DashboardSection[];
 
@@ -82,25 +81,32 @@ export class DashboardWidget implements FarpatchWidget {
     this.navItem = new NavWidget(this);
 
     this.sections = [
-      new DashboardSection("voltages", "Voltages", [
-        new DashboardItem("system-voltage", "System", "3.3V"),
-        new DashboardItem("target-voltage", "Target", "1.8V"),
-        new DashboardItem("usb-voltage", "USB", "5.0V"),
-        new DashboardItem("ext-voltage", "Extra", "3.8V"),
-      ]),
-      new DashboardSection("network", "Network", [
-        new DashboardItem("ip-address", "IP Address", "10.0.0.5"),
-        new DashboardItem("gdb-port", "GDB Port", "2022"),
-        new DashboardItem("uart-port", "UART Port", "2023"),
-      ]),
-      new DashboardSection("target", "Target", [
-        new DashboardItem("detected-devices", "Detected Devices", "STM32F4"),
-        new DashboardItem("flash-size", "Flash Size", "512k"),
-        new DashboardItem("ram-size", "RAM Size", "32k"),
-      ]),
       new DashboardSection("about", "About", [
-        new DashboardItem("farpatch-version", "Farpatch Version", "5555239293"),
-        new DashboardItem("bmp-version", "Blackmagic Version", "1.10.0"),
+        new DashboardItem("about-farpatch", "Farpatch Version", ""),
+        new DashboardItem("about-esp-idf", "ESP-IDF Version", ""),
+        new DashboardItem("about-bmp", "BMP Version", ""),
+        new DashboardItem("about-build-time", "Build Time", ""),
+        new DashboardItem("about-hardware", "Hardware", ""),
+      ]),
+      new DashboardSection("voltages", "Voltages", [
+        new DashboardItem("voltage-system", "System", ""),
+        new DashboardItem("voltage-target", "Target", ""),
+        new DashboardItem("voltage-usb", "USB", ""),
+        new DashboardItem("voltage-debug", "Debug", ""),
+        new DashboardItem("voltage-ext", "Extra", ""),
+      ]),
+      // new DashboardSection("target", "Target", [
+      //   new DashboardItem("detected-devices", "Detected Devices", "STM32F4"),
+      //   new DashboardItem("flash-size", "Flash Size", "512k"),
+      //   new DashboardItem("ram-size", "RAM Size", "32k"),
+      // ]),
+      new DashboardSection("ports", "Networking", [
+        new DashboardItem("net-gdb", "GDB", ""),
+        new DashboardItem("net-rtt-tcp", "RTT (TCP)", ""),
+        new DashboardItem("net-rtt-udp", "RTT (UDP)", ""),
+        new DashboardItem("net-uart-tcp", "UART (TCP)", ""),
+        new DashboardItem("net-uart-udp", "UART (UDP)", ""),
+        new DashboardItem("net-tftp", "TFTP", ""),
       ]),
     ];
   }
@@ -121,6 +127,61 @@ export class DashboardWidget implements FarpatchWidget {
   onFocus(element: HTMLElement): void {
     console.log("Displaying Dashboard Widget");
     element.appendChild(this.view);
+
+    fetch("/fp/status").then((response: Response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return response.json();
+    }).then((json) => {
+      if (!json) {
+        throw new Error("Response was not JSON");
+      }
+
+      // Assign the values from the network ports to the dashboard items
+      var fields = json.version;
+      // Loop through all the network ports and assign the values to the dashboard items
+      for (var key in fields) {
+        var value = fields[key];
+        var field = document.getElementById("dashboard-item-value-about-" + key);
+        if (field) {
+          field.innerText = value.toString();
+        }
+      }
+
+      // Assign the values from the network ports to the dashboard items
+      var fields = json.networking;
+      // Loop through all the network ports and assign the values to the dashboard items
+      for (var key in fields) {
+        var value = fields[key];
+        var field = document.getElementById("dashboard-item-value-net-" + key);
+        if (field) {
+          field.innerText = value.toString();
+        }
+      }
+
+      // Assign the values from the network ports to the dashboard items
+      var fields = json.networking;
+      // Loop through all the network ports and assign the values to the dashboard items
+      for (var key in fields) {
+        var value = fields[key];
+        var field = document.getElementById("dashboard-item-value-net-" + key);
+        if (field) {
+          field.innerText = value.toString();
+        }
+      }
+
+      // Assign the values from the network ports to the dashboard items
+      var fields = json.voltages;
+      // Loop through all the network ports and assign the values to the dashboard items
+      for (var key in fields) {
+        var value = fields[key];
+        var field = document.getElementById("dashboard-item-value-voltage-" + key);
+        if (field) {
+          field.innerText = (value / 1000).toString() + "V";
+        }
+      }
+    });
 
     DASHBOARD_UPDATE_TIMER = window.setInterval(() => {
       console.log("Updating Dashboard Widget");
