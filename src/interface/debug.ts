@@ -6,7 +6,7 @@ import { KeepaliveTcpSocket } from "../terminal";
 
 export class DebugWidget implements FarpatchWidget {
     name: string;
-    icon: string = "scroll";
+    icon: string = "script-text";
     title: string = "Debug";
     socket: KeepaliveTcpSocket = new KeepaliveTcpSocket("debug");
     index: number = 0;

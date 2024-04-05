@@ -6,7 +6,7 @@ import { KeepaliveTcpSocket } from "../terminal";
 
 export class RttWidget implements FarpatchWidget {
     name: string;
-    icon: string = "microchip";
+    icon: string = "chip";
     title: string = "RTT";
     index: number = 0;
     socket: KeepaliveTcpSocket;

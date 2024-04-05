@@ -49,9 +49,9 @@ export class NavWidget {
         navViewLink.classList.add("sidenav-link");
 
         var navViewIcon = document.createElement("span");
-        navViewIcon.classList.add("las");
-        navViewIcon.classList.add("la-3x");
-        navViewIcon.classList.add("la-" + widget.icon);
+        navViewIcon.classList.add("si");
+        navViewIcon.classList.add("si-3x");
+        navViewIcon.classList.add("si-" + widget.icon);
         navViewIcon.classList.add("icon");
 
         var navViewText = document.createElement("span");

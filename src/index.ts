@@ -110,9 +110,9 @@ document.addEventListener('DOMContentLoaded', function () {
     var toggleSidebarLink = document.createElement("a");
     toggleSidebarLink.classList.add("sidenav-link");
     var toggleSidebarIcon = document.createElement("span");
-    toggleSidebarIcon.classList.add("las");
-    toggleSidebarIcon.classList.add("la-3x");
-    toggleSidebarIcon.classList.add("la-bars");
+    toggleSidebarIcon.classList.add("si");
+    toggleSidebarIcon.classList.add("si-3x");
+    toggleSidebarIcon.classList.add("si-menu");
     toggleSidebarIcon.classList.add("icon");
     var toggleSidebarText = document.createElement("span");
     toggleSidebarText.classList.add("link-text");

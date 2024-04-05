@@ -74,7 +74,7 @@ export class SettingsWidget implements FarpatchWidget {
   view: HTMLElement = document.createElement("div");
   navItem: NavWidget;
   name: string;
-  icon: string = "sliders-h";
+  icon: string = "tune";
   title: string = "Settings";
   sections: SettingsSection[];
   wifiPasswordField: HTMLElement;

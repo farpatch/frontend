@@ -4,6 +4,16 @@ const OUTPUT = "build";
 
 import { installMiddlewares } from './mock/webpack.farpatch';
 
+import { subsetIconfont, MdiProvider, FaFreeProvider } from 'subset-iconfont';
+
+const mdi = new MdiProvider(['home', 'keyboard', 'chip', 'script-text', 'tune', 'menu']);
+
+subsetIconfont([mdi], './icons', { formats: ['ttf', 'woff2', 'eot', 'woff'] }).then(
+  (result) => {
+    console.log('Done!');
+  }
+);
+
 module.exports = {
     mode: 'development',
     entry: path.resolve(__dirname, './src/index.ts'),
@@ -11,7 +21,9 @@ module.exports = {
         new CopyPlugin({
             patterns: [
                 { from: "static", to: path.resolve(__dirname, OUTPUT) },
-                { from: "node_modules/xterm/css/xterm.css", to: path.resolve(__dirname, OUTPUT, 'css') }
+                { from: "node_modules/xterm/css/xterm.css", to: path.resolve(__dirname, OUTPUT, 'css') },
+                { from: "icons/webfonts", to: path.resolve(__dirname, OUTPUT, 'webfonts') },
+                { from: "icons/css/all.min.css", to: path.resolve(__dirname, OUTPUT, 'css/subset-iconfont.min.css') }
             ],
         }),
     ],
