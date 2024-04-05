@@ -89,10 +89,7 @@ export class SettingsWidget implements FarpatchWidget {
         new SettingsItem("ap-ssid", "SSID", ""),
         new SettingsItem("ap-password", "Password", ""),
       ]),
-      new SettingsSection("update", "Update", [
-        new SettingsItem("input", "Firmware", ""),
-        new SettingsItem("start", "", ""),
-      ]),
+      new SettingsSection("update", "Update", []),
       new SettingsSection("wifi", "Wifi Client", []),
     ];
 
@@ -228,6 +225,57 @@ export class SettingsWidget implements FarpatchWidget {
     ap_enabled?.appendChild(enabled_checkbox);
     ssid_container?.appendChild(ssid_input);
     password_container?.appendChild(password_input);
+
+    var updateElement = this.view.querySelector("#settings-section-fieldset-update");
+    var updater = document.createElement("form");
+    updateElement?.appendChild(updater);
+
+    var updaterFile = document.createElement("input") as HTMLInputElement;
+    updaterFile.id = "settings-item-value-update-file";
+    updaterFile.type = "file";
+    updater.appendChild(updaterFile);
+
+    var updaterInput = document.createElement("input") as HTMLInputElement;
+    updaterInput.id = "settings-item-value-update-submit";
+    updaterInput.type = "submit";
+    updaterInput.value = "Update";
+    updater.appendChild(updaterInput);
+
+    updater.onsubmit = (event) => {
+      var file = updaterFile.files?.item(0);
+      if (!file) {
+        throw new Error("No file selected");
+      }
+
+      fetch("/fp/flash/upload", {
+        method: "POST",
+        body: file
+      }).then((response: Response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      }).then((json) => {
+        if (!json) {
+          throw new Error("Response was not JSON");
+        }
+        if (!json.success) {
+          throw new Error("Update failed");
+        }
+        fetch("/fp/flash/reboot").then((response: Response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        }).then((json) => {
+          if (!json) {
+            throw new Error("Response was not JSON");
+          }
+          console.log("Rebooting");
+        });
+      });
+      return false;
+    }
   }
 
   rssiToIcon(rssi: number): string {
