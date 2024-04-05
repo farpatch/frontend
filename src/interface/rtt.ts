@@ -2,14 +2,15 @@ import { FarpatchWidget, NavWidget, WidgetState } from "../interfaces";
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { SerializeAddon } from '@xterm/addon-serialize';
+import { KeepaliveTcpSocket } from "../terminal";
 
 export class RttWidget implements FarpatchWidget {
     name: string;
     icon: string = "microchip";
     title: string = "RTT";
     index: number = 0;
-    socket: WebSocket | undefined = undefined;
-    websocketUrl: string = "ws://" + window.location.host + "/ws/rtt";
+    socket: KeepaliveTcpSocket;
+    visible: boolean = false;
 
     view: HTMLElement;
     navItem: NavWidget;
@@ -29,6 +30,7 @@ export class RttWidget implements FarpatchWidget {
         this.fitAddon = new FitAddon();
         this.serializeAddon = new SerializeAddon();
         this.resizeFunction = this.resizeTerminal.bind(this);
+        this.socket = new KeepaliveTcpSocket("rtt");
     }
 
     updateIndex(index: number): void {
@@ -46,6 +48,24 @@ export class RttWidget implements FarpatchWidget {
         this.fitAddon.activate(this.terminal)
         this.fitAddon.fit()
         this.terminal.focus()
+        this.socket.onmessage = (event: MessageEvent) => {
+            this.terminal.write(new Uint8Array(event.data));
+            if (!this.visible) {
+                this.navItem.setHasData(true);
+            }
+        }
+        this.socket.onopen = (_event: Event) => {
+            this.navItem.updateState(WidgetState.Active);
+        }
+        this.socket.onclose = (_event: CloseEvent) => {
+            this.navItem.updateState(WidgetState.Error);
+        }
+        this.socket.oncreate = (_event) => {
+            this.navItem.updateState(WidgetState.Paused);
+        }
+        this.socket.onerror = (_event: Event) => {
+            this.navItem.updateState(WidgetState.Error);
+        }
     }
 
     onFocus(element: HTMLElement): void {
@@ -57,14 +77,13 @@ export class RttWidget implements FarpatchWidget {
             this.terminal.loadAddon(this.fitAddon);
             this.terminal.loadAddon(this.serializeAddon);
             this.terminal.onKey((e) => {
-                console.log("Key pressed: " + e.key);
                 this.terminal.write(e.key);
                 if (e.key === '\r') {
                     this.terminal.write('\n');
                 }
             });
             this.terminal.open(this.view);
-            this.createSocket();
+            this.socket.connect();
             this.initialized = true;
         }
         element.appendChild(this.view);
@@ -73,48 +92,19 @@ export class RttWidget implements FarpatchWidget {
             this.terminal.focus();
             this.resizeFunction();
         }, 10);
+        this.visible = true;
+        this.navItem.setHasData(false);
     }
 
     onBlur(element: HTMLElement): void {
         console.log("Archiving RTT Widget");
         element.removeChild(this.view);
         window.removeEventListener('resize', this.resizeFunction);
+        this.visible = false;
     }
 
     // Whenever the window is resized, update the size of the terminal
     resizeTerminal() {
         this.fitAddon.fit();
-    }
-
-    createSocket() {
-        this.navItem.updateState(WidgetState.Paused);
-        this.socket = new WebSocket(this.websocketUrl);
-        this.socket.binaryType = 'arraybuffer';
-        this.socket.onopen = (_e: Event) => {
-            this.navItem.updateState(WidgetState.Active);
-            this.terminal.write("\x1B[1;3;31m[Websocket] Connection established\x1B[0m\r\n");
-        };
-
-        this.socket.onmessage = (event: MessageEvent) => {
-            this.terminal.write(new Uint8Array(event.data));
-        };
-
-        this.socket.onerror = (_event: Event) => {
-            this.navItem.updateState(WidgetState.Error);
-            this.socket?.close();
-        }
-
-        this.socket.onclose = (event: CloseEvent) => {
-            if (event.wasClean) {
-                this.navItem.updateState(WidgetState.Error);
-                this.terminal.write("[Websocket] Connection closed");
-            } else {
-                // e.g. server process killed or network down
-                // event.code is usually 1006 in this case
-                this.navItem.updateState(WidgetState.Error);
-                this.terminal.write("[Websocket] Connection died");
-            }
-            this.createSocket();
-        }
     }
 }
