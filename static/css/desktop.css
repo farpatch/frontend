@@ -113,7 +113,8 @@ main {
 }
 
 .link-text {
-	margin-left: 0.5rem;
+	/* margin-left: 0.5rem; */
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
 	overflow: hidden;
 	white-space: nowrap;
 	cursor: pointer;
@@ -135,9 +136,10 @@ main {
 	background-color: rgb(173, 175, 192);
 }
 
-.widget-state-error>.sidenav-link>.icon {
-	background-color: rgb(255, 203, 203);
+.widget-has-data>.sidenav-link>.link-text {
+	font-weight: bold;
 }
+
 .terminal {
 	height: 100%;
 	width: 100%;

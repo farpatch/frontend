@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function () {
     toggleSidebarIcon.classList.add("icon");
     var toggleSidebarText = document.createElement("span");
     toggleSidebarText.classList.add("link-text");
-    toggleSidebarText.innerText = "Hide Sidebar";
+    toggleSidebarText.innerText = "Hide";
     toggleSidebarLink.appendChild(toggleSidebarIcon);
     toggleSidebarLink.appendChild(toggleSidebarText);
     toggleSidebar.appendChild(toggleSidebarLink);

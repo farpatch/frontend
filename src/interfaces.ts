@@ -27,7 +27,6 @@ export interface FarpatchWidget {
     navItem: NavWidget,
     icon: string,
     title: string,
-    updateState: (state: WidgetState) => void,
     updateIndex(index: number): void,
     onInit(): void,
     onFocus(element: HTMLElement): void,
@@ -70,6 +69,33 @@ export class NavWidget {
         this.iconView = navViewIcon as HTMLSpanElement;
         this.textView = navViewText as HTMLSpanElement;
     }
+
+    updateState(state: WidgetState): void {
+        var states = ["Idle", "Active", "Paused", "Error"];
+        var icon = this.navView;
+        icon.classList.remove("widget-state-active");
+        icon.classList.remove("widget-state-paused");
+        icon.classList.remove("widget-state-error");
+        if (state == WidgetState.Active) {
+            icon.classList.add("widget-state-active");
+        } else if (state == WidgetState.Paused) {
+            icon.classList.add("widget-state-paused");
+        } else if (state == WidgetState.Error) {
+            icon.classList.add("widget-state-error");
+        }
+        console.log("State update for " + this.farpatchWidget.name + ": " + states[state]);
+    }
+
+    // Indicate whether or not this widget has data. Useful for
+    // e.g. indicating a serial port has new data but the view
+    // is not focused.
+    setHasData(hasData: boolean): void {
+        var icon = this.navView;
+        icon.classList.remove("widget-has-data");
+        if (hasData) {
+            icon.classList.add("widget-has-data");
+        }
+    }
 }
 
 export const farpatchWidgets: FarpatchWidget[] = [
@@ -82,19 +108,4 @@ export const farpatchWidgets: FarpatchWidget[] = [
 
 for (var i = 0; i < farpatchWidgets.length; i++) {
     farpatchWidgets[i].updateIndex(i);
-    farpatchWidgets[i].updateState = function (state: WidgetState) {
-        var states = ["Idle", "Active", "Paused", "Error"];
-        var icon = this.navItem.navView;
-        icon.classList.remove("widget-state-active");
-        icon.classList.remove("widget-state-paused");
-        icon.classList.remove("widget-state-error");
-        if (state == WidgetState.Active) {
-            icon.classList.add("widget-state-active");
-        } else if (state == WidgetState.Paused) {
-            icon.classList.add("widget-state-paused");
-        } else if (state == WidgetState.Error) {
-            icon.classList.add("widget-state-error");
-        }
-        console.log("State update for " + this.name + ": " + states[state]);
-    }
 }

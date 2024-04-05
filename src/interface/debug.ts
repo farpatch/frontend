@@ -2,34 +2,18 @@ import { WidgetState, FarpatchWidget, NavWidget } from "../interfaces";
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { SerializeAddon } from '@xterm/addon-serialize';
-
-class KeepaliveWebSocket extends WebSocket {
-    intervalId: NodeJS.Timeout;
-    replacementCreated: boolean = false;
-
-    constructor(url: string) {
-        super(url);
-        this.intervalId = setInterval(() => this.ontimeout(), 2000);
-    }
-
-    ontimeout() {
-        if (this.readyState == WebSocket.OPEN) {
-            this.send('');
-        }
-    }
-}
+import { KeepaliveTcpSocket } from "../terminal";
 
 export class DebugWidget implements FarpatchWidget {
     name: string;
     icon: string = "scroll";
     title: string = "Debug";
-    socket: KeepaliveWebSocket | undefined = undefined;
+    socket: KeepaliveTcpSocket = new KeepaliveTcpSocket("debug");
     index: number = 0;
-    websocketUrl: string = "ws://" + window.location.host + "/ws/debug";
+    visible: boolean = false;
 
     view: HTMLElement;
     navItem: NavWidget;
-    updateState: (state: WidgetState) => void = () => { };
 
     zork: Generator | undefined = undefined;
     zorkCallback: (value: string | PromiseLike<string>) => void = () => { };
@@ -49,6 +33,25 @@ export class DebugWidget implements FarpatchWidget {
         this.fitAddon = new FitAddon();
         this.serializeAddon = new SerializeAddon();
         this.resizeFunction = this.resizeTerminal.bind(this);
+
+        this.socket.onclose = (_event: CloseEvent) => {
+            this.navItem.updateState(WidgetState.Error);
+        }
+        this.socket.onopen = (_event: Event) => {
+            this.navItem.updateState(WidgetState.Active);
+        }
+        this.socket.onmessage = (event: MessageEvent) => {
+            this.terminal.write(new Uint8Array(event.data));
+            if (!this.visible) {
+                this.navItem.setHasData(true);
+            }
+        }
+        this.socket.onerror = (_event: Event) => {
+            this.navItem.updateState(WidgetState.Error);
+        }
+        this.socket.oncreate = (_event) => {
+            this.navItem.updateState(WidgetState.Paused);
+        }
     }
 
     updateIndex(index: number): void {
@@ -65,6 +68,7 @@ export class DebugWidget implements FarpatchWidget {
 
     onFocus(element: HTMLElement): void {
         console.log("Displaying Debug Log Widget");
+        this.visible = true;
         if (!this.initialized) {
             // Ensure the parent frame doesn't get any scrollbars, since we're taking up the whole view
             element.style.overflow = "hidden";
@@ -79,7 +83,7 @@ export class DebugWidget implements FarpatchWidget {
                 }
             });
             this.terminal.open(this.view);
-            this.createSocket();
+            this.socket.connect();
             this.initialized = true;
         }
         element.appendChild(this.view);
@@ -88,65 +92,18 @@ export class DebugWidget implements FarpatchWidget {
             this.terminal.focus();
             this.resizeFunction();
         }, 10);
+        this.navItem.setHasData(false);
     }
 
     onBlur(element: HTMLElement): void {
         console.log("Archiving Debug Widget");
         element.removeChild(this.view);
         window.removeEventListener('resize', this.resizeFunction);
+        this.visible = false;
     }
 
     // Whenever the window is resized, update the size of the terminal
     resizeTerminal() {
         this.fitAddon.fit();
-    }
-
-    createSocket() {
-        if ((this.socket !== undefined) && !this.socket?.replacementCreated) {
-            this.socket?.close();
-        }
-        this.updateState(WidgetState.Paused);
-        this.socket = new KeepaliveWebSocket(this.websocketUrl);
-        this.socket.binaryType = 'arraybuffer';
-        this.socket.replacementCreated = false;
-
-        this.socket.onmessage = (event: MessageEvent) => {
-            this.terminal.write(new Uint8Array(event.data));
-        };
-
-        this.socket.onerror = (_event: Event) => {
-            this.updateState(WidgetState.Error);
-            this.socket?.close();
-        }
-
-        this.socket.onclose = (event: CloseEvent) => {
-            if (typeof this.socket === "undefined") {
-                return;
-            }
-            this.socket.onerror = null;
-            this.socket.onclose = null;
-            clearInterval(this.socket.intervalId);
-            // if (event.wasClean) {
-            //     this.terminal.write("[Websocket] Connection closed");
-            // } else {
-            //     // e.g. server process killed or network down
-            //     // event.code is usually 1006 in this case
-            //     this.terminal.write("[Websocket] Connection died");
-            // }
-
-            if (!this.socket.replacementCreated) {
-                this.socket.replacementCreated = true;
-                this.updateState(WidgetState.Error);
-                this.createSocket();
-            } else {
-                console.log("a replacement socket was already being created -- skipping");
-            }
-        }
-
-        this.socket.onopen = (_e: Event) => {
-            this.updateState(WidgetState.Active);
-            // this.terminal.write("\x1B[1;3;31m[Websocket] Connection established\x1B[0m\r\n");
-        };
-
     }
 }

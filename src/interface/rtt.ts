@@ -19,7 +19,6 @@ export class RttWidget implements FarpatchWidget {
     serializeAddon: SerializeAddon;
     resizeFunction: () => void;
     initialized: boolean = false;
-    updateState: (state: WidgetState) => void = () => { };
 
     constructor(name: string) {
         this.name = name;
@@ -88,11 +87,11 @@ export class RttWidget implements FarpatchWidget {
     }
 
     createSocket() {
-        this.updateState(WidgetState.Paused);
+        this.navItem.updateState(WidgetState.Paused);
         this.socket = new WebSocket(this.websocketUrl);
         this.socket.binaryType = 'arraybuffer';
         this.socket.onopen = (_e: Event) => {
-            this.updateState(WidgetState.Active);
+            this.navItem.updateState(WidgetState.Active);
             this.terminal.write("\x1B[1;3;31m[Websocket] Connection established\x1B[0m\r\n");
         };
 
@@ -101,18 +100,18 @@ export class RttWidget implements FarpatchWidget {
         };
 
         this.socket.onerror = (_event: Event) => {
-            this.updateState(WidgetState.Error);
+            this.navItem.updateState(WidgetState.Error);
             this.socket?.close();
         }
 
         this.socket.onclose = (event: CloseEvent) => {
             if (event.wasClean) {
-                this.updateState(WidgetState.Error);
+                this.navItem.updateState(WidgetState.Error);
                 this.terminal.write("[Websocket] Connection closed");
             } else {
                 // e.g. server process killed or network down
                 // event.code is usually 1006 in this case
-                this.updateState(WidgetState.Error);
+                this.navItem.updateState(WidgetState.Error);
                 this.terminal.write("[Websocket] Connection died");
             }
             this.createSocket();
