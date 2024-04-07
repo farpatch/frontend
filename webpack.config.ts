@@ -9,10 +9,29 @@ import { subsetIconfont, MdiProvider, FaFreeProvider } from 'subset-iconfont';
 const mdi = new MdiProvider(['home', 'keyboard', 'chip', 'script-text', 'tune', 'menu']);
 
 subsetIconfont([mdi], './icons', { formats: ['ttf', 'woff2', 'eot', 'woff'] }).then(
-  (result) => {
-    console.log('Done!');
-  }
+    (result) => {
+        console.log('Font subsetting complete');
+    }
 );
+
+var proxyTarget: Array<any> = [];
+if (process.env.PROXY_TARGET !== undefined) {
+    proxyTarget = [
+        {
+            context: ['/ws'],
+            target: 'ws://' + process.env.PROXY_TARGET,
+            ws: true,
+            onError(err: any, _req: any, _res: any) {
+                console.log('Suppressing WDS proxy upgrade error:', err);
+            },
+        },
+        {
+            context: ['/fp'],
+            target: 'http://' + process.env.PROXY_TARGET,
+            ws: false,
+        },
+    ];
+}
 
 module.exports = {
     mode: 'development',
@@ -62,30 +81,19 @@ module.exports = {
         },
         compress: true,
         port: 9000,
-        proxy: [
-            {
-                context: ['/ws'],
-                target: 'ws://10.0.237.163',
-                ws: true,
-                onError(err: any, _req: any, _res: any) {
-                    console.log('Suppressing WDS proxy upgrade error:', err);
-                },
-            },
-            {
-                context: ['/fp'],
-                target: 'http://10.0.237.163',
-                ws: false,
-            },
-        ],
-        // setupMiddlewares: (middlewares: any, devServer: any) => {
-        //     if (!devServer) {
-        //         throw new Error('webpack-dev-server is not defined');
-        //     }
+        proxy: proxyTarget,
+        setupMiddlewares: (middlewares: any, devServer: any) => {
+            if (!devServer) {
+                throw new Error('webpack-dev-server is not defined');
+            }
 
-        //     if (false) {
-        //         installMiddlewares(devServer.app);
-        //     }
-        //     return middlewares;
-        // }
+            if (process.env.PROXY_TARGET === undefined) {
+                console.log("PROXY_TARGET not set -- creating mock API server");
+                installMiddlewares(devServer.app);
+            } else {
+                console.log("Proxying connections to " + process.env.PROXY_TARGET);
+            }
+            return middlewares;
+        }
     },
 };
