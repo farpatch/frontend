@@ -91,6 +91,10 @@ export class SettingsWidget implements FarpatchWidget {
       ]),
       new SettingsSection("update", "Update", []),
       new SettingsSection("wifi", "Wifi Client", []),
+      new SettingsSection("uart", "UART", [
+        new SettingsItem("baud", "Baud Rate", ""),
+        new SettingsItem("break", "Break", ""),
+      ]),
     ];
 
     this.wifiPasswordField = document.createElement("form");
@@ -276,6 +280,39 @@ export class SettingsWidget implements FarpatchWidget {
       });
       return false;
     }
+
+    var baudElement = this.view.querySelector("#settings-item-value-baud");
+    if (!baudElement) {
+      throw new Error("No baud element");
+    }
+    var baudBox = document.createElement("input") as HTMLInputElement;
+    baudBox.type = "number";
+    baudBox.min = "1";
+    baudBox.max = "524200";
+    baudBox.step = "1";
+    baudBox.id = "settings-item-value-uart-baud-input";
+    baudElement.appendChild(baudBox);
+    baudBox.addEventListener("change", () => {
+      var baud = parseInt(baudBox.value);
+      if (baud < 1 || baud > 524200) {
+        throw new Error("Invalid baud rate");
+      }
+      fetch("/fp/uart/baud?set=" + baud).then(response => response.json())
+    });
+
+    var breakElement = this.view.querySelector("#settings-item-value-break");
+    if (!breakElement) {
+      throw new Error("No break element");
+    }
+    var breakInput = document.createElement("input") as HTMLInputElement;
+    breakInput.type = "submit";
+    breakInput.id = "settings-item-value-uart-break-input";
+    breakInput.value = "Send Break";
+    breakElement.appendChild(breakInput);
+    breakInput.addEventListener("click", () => {
+      fetch("/fp/uart/break");
+      return false;
+    });
   }
 
   rssiToIcon(rssi: number): string {
@@ -391,6 +428,9 @@ export class SettingsWidget implements FarpatchWidget {
             scanResults.appendChild(scanResult);
           }
         }
+        fetch("/fp/uart/baud").then(response => response.json()).then(json => {
+          document.getElementById("settings-item-value-uart-baud-input")?.setAttribute("value", json.baudrate.toString());
+        });
       });
     });
 

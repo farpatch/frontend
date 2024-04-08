@@ -38,8 +38,6 @@ export class RttWidget implements FarpatchWidget {
     }
 
     onInit(): void {
-        console.log("Initialized RTT Widget");
-
         this.terminal.open(this.view);
 
         this.terminal.onData(chunk => {
@@ -73,7 +71,6 @@ export class RttWidget implements FarpatchWidget {
         if (!this.initialized) {
             // Ensure the parent frame doesn't get any scrollbars, since we're taking up the whole view
             element.style.overflow = "hidden";
-            console.log("Initializing xterm.js");
             this.terminal.loadAddon(this.fitAddon);
             this.terminal.loadAddon(this.serializeAddon);
             this.terminal.onKey((e) => {
@@ -97,7 +94,6 @@ export class RttWidget implements FarpatchWidget {
     }
 
     onBlur(element: HTMLElement): void {
-        console.log("Archiving RTT Widget");
         element.removeChild(this.view);
         window.removeEventListener('resize', this.resizeFunction);
         this.visible = false;

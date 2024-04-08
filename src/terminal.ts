@@ -39,26 +39,6 @@ export class KeepaliveTcpSocket {
 
     connect() {
         this.recreateSocket();
-        // this.socket = new WebSocket(BASE_PATH + this.kind);
-        // this.socket.binaryType = 'arraybuffer';
-        // this.socket.onmessage = (event: MessageEvent) => {
-        //     console.log("Received message: " + event.data);
-        // };
-        // this.socket.onerror = (_event: Event) => {
-        //     console.log("Socket error");
-        // }
-        // this.socket.onclose = (event: CloseEvent) => {
-        //     console.log("Socket closed");
-        //     if (!this.replacementCreated) {
-        //         this.replacementCreated = true;
-        //         this.connect();
-        //     } else {
-        //         console.log("a replacement socket was already being created -- skipping");
-        //     }
-        // }
-        // this.socket.onopen = (_e: Event) => {
-        //     console.log("Socket opened");
-        // };
     }
 
     ontimeout() {
@@ -68,7 +48,12 @@ export class KeepaliveTcpSocket {
     }
 
     send(data: string | ArrayBufferView | Blob | ArrayBufferLike) {
-        this.socket?.send(data);
+        try {
+            this.socket?.send(data);
+        } catch (e) {
+            console.log("Error sending data: " + e);
+            this.recreateSocket();
+        }
     }
 
     recreateSocket() {
@@ -84,7 +69,6 @@ export class KeepaliveTcpSocket {
         this.replacementCreated = false;
 
         this.socket.onmessage = (event: MessageEvent) => {
-            console.log("Received message: " + event.data);
             this.onmessage(event);
         };
 
