@@ -43,7 +43,7 @@ export class KeepaliveTcpSocket {
 
     ontimeout() {
         if (this.socket?.readyState == WebSocket.OPEN) {
-            this.socket.send('');
+            this.send('');
         }
     }
 
@@ -52,7 +52,11 @@ export class KeepaliveTcpSocket {
             this.socket?.send(data);
         } catch (e) {
             console.log("Error sending data: " + e);
-            this.recreateSocket();
+            if (!this.replacementCreated) {
+                this.replacementCreated = true;
+                this.onclose(new CloseEvent("close"));
+                this.recreateSocket();
+            }
         }
     }
 

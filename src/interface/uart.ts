@@ -72,11 +72,6 @@ export class UartWidget implements FarpatchWidget {
             element.style.overflow = "hidden";
             this.terminal.loadAddon(this.fitAddon);
             this.terminal.loadAddon(this.serializeAddon);
-            this.terminal.onKey((e) => {
-                if (e.key === '\r') {
-                    this.terminal.write('\n');
-                }
-            });
             this.terminal.open(this.view);
             this.socket.connect();
             this.initialized = true;

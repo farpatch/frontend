@@ -6,6 +6,16 @@ var currentWidget: FarpatchWidget = farpatchWidgets[0];
 var widgetViews: HTMLElement[] = [];
 // var currentWidgetView: HTMLElement = document.getElementById(currentWidgetName + "-view") as HTMLElement;
 
+function collapseSidebar(main: HTMLElement, sideNav: HTMLElement) {
+    main.classList.add("main-sidebar-rail");
+    sideNav.classList.add("sidenav-rail");
+}
+
+function expandSidebar(main: HTMLElement, sideNav: HTMLElement) {
+    main.classList.remove("main-sidebar-rail");
+    sideNav.classList.remove("sidenav-rail");
+}
+
 function addToggleSidebarListener(element: HTMLElement) {
     // Hide or show the sidebar. MaterialUI calls this toggling between
     // a "rail" and a "sidebar".
@@ -13,14 +23,16 @@ function addToggleSidebarListener(element: HTMLElement) {
         // Hide or show the main content area
         var main = document.getElementsByTagName("main")[0];
         // Adjust the width of the sidebar as well
-        var sideNav = document.querySelectorAll(".sidenav")[0];
+        var sideNav = document.querySelectorAll(".sidenav")[0] as HTMLElement;
+        var config = getPageConfig();
         if (main.classList.contains("main-sidebar-rail")) {
-            main.classList.remove("main-sidebar-rail");
-            sideNav.classList.remove("sidenav-rail");
+            expandSidebar(main, sideNav);
+            delete config['r'];
         } else {
-            main.classList.add("main-sidebar-rail");
-            sideNav.classList.add("sidenav-rail");
+            config['r'] = "f";
+            collapseSidebar(main, sideNav);
         }
+        savePageConfig(config);
 
     }, false);
 }
@@ -134,6 +146,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (maybeFirstWidget) {
             currentWidget = maybeFirstWidget;
         }
+    }
+    if (config['r']) {
+        collapseSidebar(mainView, sidenav);
     }
     activateWidget(currentWidget);
 
