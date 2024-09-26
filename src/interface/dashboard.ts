@@ -108,6 +108,7 @@ export class DashboardWidget implements FarpatchWidget {
         new DashboardItem("net-netmask", "Netmask", ""),
         new DashboardItem("net-gdb", "GDB", ""),
         new DashboardItem("net-rtt-tcp", "RTT (TCP)", ""),
+        new DashboardItem("net-rtt-channels", "RTT Channels", ""),
         new DashboardItem("net-rtt-udp", "RTT (UDP)", ""),
         new DashboardItem("net-uart-tcp", "UART (TCP)", ""),
         new DashboardItem("net-uart-udp", "UART (UDP)", ""),
@@ -186,6 +187,8 @@ export class DashboardWidget implements FarpatchWidget {
           field.innerText = (value / 1000).toString() + "V";
         }
       }
+    }).catch((error) => {
+      console.error("Error:", error);
     });
 
     DASHBOARD_UPDATE_TIMER = window.setInterval(() => {
@@ -213,6 +216,8 @@ export class DashboardWidget implements FarpatchWidget {
               field.innerText = voltage.toPrecision(3) + "V";
             }
           }
+        }).catch((error) => {
+          console.error("Error:", error);
         });
       })
     }, 1000);

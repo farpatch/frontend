@@ -1,3 +1,4 @@
+import { get } from "http";
 import { WidgetState, FarpatchWidget, NavWidget } from "../interfaces";
 
 
@@ -89,11 +90,17 @@ export class SettingsWidget implements FarpatchWidget {
         new SettingsItem("ap-ssid", "SSID", ""),
         new SettingsItem("ap-password", "Password", ""),
       ]),
-      new SettingsSection("update", "Update", []),
+      new SettingsSection("update", "Update", [
+        new SettingsItem("update-progress", "Progress", ""),
+      ]),
       new SettingsSection("wifi", "Wifi Client", []),
       new SettingsSection("uart", "UART", [
         new SettingsItem("baud", "Baud Rate", ""),
         new SettingsItem("break", "Break", ""),
+      ]),
+      new SettingsSection("reboot", "Reboot", [
+        new SettingsItem("reboot", "Reboot", ""),
+        new SettingsItem("reboot-result", "Result", ""),
       ]),
     ];
 
@@ -153,6 +160,8 @@ export class SettingsWidget implements FarpatchWidget {
         if (!json) {
           throw new Error("Response was not JSON");
         }
+      }).catch((error) => {
+        console.log("Failed to connect to AP: " + error);
       });
       return false;
     }
@@ -184,6 +193,8 @@ export class SettingsWidget implements FarpatchWidget {
       if (!json) {
         throw new Error("Response was not JSON");
       }
+    }).catch((error) => {
+      console.log("Failed to update AP settings: " + error);
     });
   }
 
@@ -193,9 +204,12 @@ export class SettingsWidget implements FarpatchWidget {
       this.view.appendChild(this.sections[i].render());
     }
 
-    var ap_enabled = this.view.querySelector("#settings-item-value-ap-enabled");
-    var ssid_container = this.view.querySelector("#settings-item-value-ap-ssid");
-    var password_container = this.view.querySelector("#settings-item-value-ap-password");
+    var apEnabled = this.view.querySelector("#settings-item-value-ap-enabled");
+    var ssidContainer = this.view.querySelector("#settings-item-value-ap-ssid");
+    var passwordContainer = this.view.querySelector("#settings-item-value-ap-password");
+    var updateProgress = this.view.querySelector("#settings-item-value-update-progress");
+    var rebootContainer = this.view.querySelector("#settings-item-value-reboot");
+    var rebootResultContainer = this.view.querySelector("#settings-item-value-reboot-result");
 
     var ssid_input = document.createElement("input");
     ssid_input.type = "text";
@@ -226,9 +240,9 @@ export class SettingsWidget implements FarpatchWidget {
     };
     password_input.onchange = () => { this.updateSsid(ssid_input, password_input, enabled_checkbox) };
 
-    ap_enabled?.appendChild(enabled_checkbox);
-    ssid_container?.appendChild(ssid_input);
-    password_container?.appendChild(password_input);
+    apEnabled?.appendChild(enabled_checkbox);
+    ssidContainer?.appendChild(ssid_input);
+    passwordContainer?.appendChild(password_input);
 
     var updateElement = this.view.querySelector("#settings-section-fieldset-update");
     var updater = document.createElement("form");
@@ -245,38 +259,114 @@ export class SettingsWidget implements FarpatchWidget {
     updaterInput.value = "Update";
     updater.appendChild(updaterInput);
 
-    updater.onsubmit = (event) => {
+    var rebootInput = document.createElement("input") as HTMLInputElement;
+    rebootInput.id = "settings-item-value-update-reboot";
+    rebootInput.type = "submit";
+    rebootInput.value = "Reboot";
+
+    var rebootStatusText = (status: string) => {
+      if (!rebootResultContainer) {
+        return;
+      }
+      rebootResultContainer.innerHTML = status;
+      console.log("Set v.innerHTML to " + rebootResultContainer.innerHTML + " from " + status);
+    }
+
+    rebootInput.onclick = () => {
+      rebootStatusText("Trying to reboot...");
+      fetch("/fp/flash/reboot").then((response: Response) => {
+        if (!response.ok) {
+          rebootStatusText("Reboot failed: " + response.statusText);
+        }
+        return response.text();
+      }).then((text) => {
+        if (!text) {
+          rebootStatusText("Response was not JSON");
+        }
+        rebootStatusText(text);
+      }).catch((error) => {
+        rebootStatusText("Reboot failed: " + error);
+      });
+      return
+    }
+    rebootContainer?.appendChild(rebootInput);
+
+    var updateStatusText = (status: string) => {
+      if (!updateProgress) {
+        return;
+      }
+      updateProgress.innerHTML = status;
+    }
+
+    var getUpdateStatus = () => {
+      console.log("Getting update status");
+      fetch("/fp/flash/status").then((response: Response) => {
+        if (!response.ok) {
+          console.log("Failed to get update status: " + response.statusText);
+          updateStatusText("Status failed: " + response.statusText);
+          throw new Error("Network response was not ok");
+        }
+        return response.json().then((e) => {
+          console.log("Got update status: " + e);
+          if (e && e.ota && e.ota.status) {
+            if (e.ota.status === "valid") {
+              updateStatusText("Success");
+              return;
+            } else {
+              updateStatusText(e.ota.status);
+            }
+          } else {
+            updateStatusText("Invalid JSON response");
+          }
+        }).catch((e) => {
+          updateStatusText("Failed to parse JSON from \"" + response + ": " + e);
+        });
+      }
+    ).catch((error) => {
+      updateStatusText("Failed to get update status: " + error + " (retrying)");
+      return new Promise((resolve) => setTimeout(resolve, 1000)).then(() => {
+        getUpdateStatus();
+      });
+    })
+  };
+
+    updater.onsubmit = (_) => {
       var file = updaterFile.files?.item(0);
       if (!file) {
-        throw new Error("No file selected");
+        updateStatusText("No file selected");
       }
-
+      updateStatusText("Uploading " + file?.name + "...");
       fetch("/fp/flash/upload", {
         method: "POST",
         body: file
       }).then((response: Response) => {
         if (!response.ok) {
-          throw new Error("Network response was not ok");
+          updateStatusText("Upload failed: " + response.statusText);
         }
-        return response.json();
+        return response.json().catch((error) => { console.log("Failed to parse upload JSON: " + error); });
       }).then((json) => {
         if (!json) {
-          throw new Error("Response was not JSON");
+          updateStatusText("Response was not JSON");
+          return;
         }
         if (!json.success) {
-          throw new Error("Update failed");
+          updateStatusText("Update failed: " + json.error);
+          return;
         }
         fetch("/fp/flash/reboot").then((response: Response) => {
           if (!response.ok) {
-            throw new Error("Network response was not ok");
+            updateStatusText("Reboot failed: " + response.statusText);
+            return;
           }
-          return response.json();
-        }).then((json) => {
-          if (!json) {
-            throw new Error("Response was not JSON");
-          }
-          console.log("Rebooting");
+          return response.text().catch((error) => { console.log("Failed to parse reboot text: " + error); });
+        }).then((_) => {
+          updateStatusText("Rebooting into the new firmware");
+          return new Promise((resolve) => setTimeout(resolve, 2000)).then(() => {
+            getUpdateStatus();
+          });
         });
+      }).catch((error) => {
+        updateStatusText("Upload failed: " + error);
       });
       return false;
     }
@@ -368,7 +458,7 @@ export class SettingsWidget implements FarpatchWidget {
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-      return response.json();
+      return response.json().catch((error) => { console.log("Failed to parse AP settings JSON: " + error); });
     }).then((json) => {
       if (!json) {
         throw new Error("Response was not JSON");
@@ -388,7 +478,7 @@ export class SettingsWidget implements FarpatchWidget {
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-      return response.json();
+      return response.json().catch((error) => { console.log("Failed to parse STA JAON: " + error); });
     }).then((json) => {
       if (!json) {
         throw new Error("Response was not JSON");
@@ -433,7 +523,6 @@ export class SettingsWidget implements FarpatchWidget {
         });
       });
     });
-
   }
 
   onBlur(element: HTMLElement): void {
