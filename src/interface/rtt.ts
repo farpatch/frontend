@@ -26,7 +26,7 @@ export class RttWidget implements FarpatchWidget {
         this.navItem = new NavWidget(this);
         this.view = document.createElement("div");
         this.view.classList.add("terminal");
-        this.terminal = new Terminal({ theme: { background: "#000000" }, convertEol: true });
+        this.terminal = new Terminal({ theme: { background: "#000000" }, convertEol: true, scrollback: 50000 });
         this.fitAddon = new FitAddon();
         this.serializeAddon = new SerializeAddon();
         this.resizeFunction = this.resizeTerminal.bind(this);
@@ -46,8 +46,8 @@ export class RttWidget implements FarpatchWidget {
         this.fitAddon.activate(this.terminal)
         this.fitAddon.fit()
         this.terminal.focus()
-        this.socket.onmessage = (event: MessageEvent) => {
-            this.terminal.write(new Uint8Array(event.data));
+        this.socket.onmessage = (data: Uint8Array) => {
+            this.terminal.write(data);
             if (!this.visible) {
                 this.navItem.setHasData(true);
             }

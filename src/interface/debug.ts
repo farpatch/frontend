@@ -15,8 +15,6 @@ export class DebugWidget implements FarpatchWidget {
     view: HTMLElement;
     navItem: NavWidget;
 
-    zork: Generator | undefined = undefined;
-    zorkCallback: (value: string | PromiseLike<string>) => void = () => { };
     terminalLine: string = "";
 
     terminal: Terminal;
@@ -40,8 +38,8 @@ export class DebugWidget implements FarpatchWidget {
         this.socket.onopen = (_event: Event) => {
             this.navItem.updateState(WidgetState.Active);
         }
-        this.socket.onmessage = (event: MessageEvent) => {
-            this.terminal.write(new Uint8Array(event.data));
+        this.socket.onmessage = (data: Uint8Array) => {
+            this.terminal.write(data);
             if (!this.visible) {
                 this.navItem.setHasData(true);
             }

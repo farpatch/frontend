@@ -46,8 +46,8 @@ export class UartWidget implements FarpatchWidget {
         this.fitAddon.activate(this.terminal)
         this.fitAddon.fit()
         this.terminal.focus()
-        this.socket.onmessage = (event: MessageEvent) => {
-            this.terminal.write(new Uint8Array(event.data));
+        this.socket.onmessage = (data: Uint8Array) => {
+            this.terminal.write(data);
             if (!this.visible) {
                 this.navItem.setHasData(true);
             }
