@@ -184,7 +184,7 @@ export class DashboardWidget implements FarpatchWidget {
         var value = fields[key];
         var field = document.getElementById("dashboard-item-value-voltage-" + key);
         if (field) {
-          field.innerText = (value / 1000).toString() + "V";
+          field.innerText = (value / 1000).toPrecision(3) + "V";
         }
       }
     }).catch((error) => {
@@ -210,10 +210,15 @@ export class DashboardWidget implements FarpatchWidget {
             "ext",
           ];
           for (var i = 0; i < voltage_fields.length; i++) {
-            var field = document.getElementById("dashboard-item-value-" + voltage_fields[i] + "-voltage");
+            var field = document.getElementById("dashboard-item-value-voltage-" + voltage_fields[i]);
             var voltage = json[voltage_fields[i]];
-            if (field && typeof voltage === "number") {
-              field.innerText = voltage.toPrecision(3) + "V";
+            if (field) {
+              if (typeof voltage === "number") {
+                field.style.display = "";
+                field.innerText = (voltage/1000).toPrecision(3) + "V";
+              } else {
+                field.style.display = "none";
+              }
             }
           }
         }).catch((error) => {
